@@ -12,7 +12,7 @@
    <children>
       <ImageView fitHeight="446.0" fitWidth="838.0" layoutX="2.0" pickOnBounds="true" preserveRatio="true">
          <image>
-            <Image url="@../../../Desktop/gorillas_game_740x410.png" />
+            <Image url="gorillas_game_740x410.png" />
          </image>
       </ImageView>
       <Label layoutX="128.0" layoutY="14.0" text="Velkommen til gudespillet " textFill="#eeeee9">

@@ -3,6 +3,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 import javafx.event.EventHandler;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.input.MouseButton;
@@ -11,9 +12,10 @@ import javafx.scene.text.Font;
 
 public class GorillaButton extends Button {
 	
-	private final String FONT_PATH = "/Menu/src/93c301d40a30e87ba35fc9662e4aab2a.png";
+String FONT_PATH = "/test/src/resources/kenvector_future.ttf";
 	private final String BUTTON_PRESSED_STYLE = "-fx-background-color: transparent; -fx-background-image: url('blue_button05.png')";
-	private final String BUTTON_FREE_STYLE = "-fx-background-color: transparent; -fx-background-image: url('blue_button04.png')";
+	private final String BUTTON_FREE_STYLE = "-fx-background-color: transparent; -fx-background-image: url('/blue_button04.png')";
+	Scene mainScene;
 	
 	public GorillaButton(String text) throws FileNotFoundException {
 		setText(text);
@@ -24,8 +26,15 @@ public class GorillaButton extends Button {
 		initializeButtonListeners();
 	}
 	
-	private void setButtonFont() {
-	//	setFont(Font.loadFont(getClass().getResourceAsStream(FONT_PATH), 23));
+	private void setButtonFont() throws FileNotFoundException {
+
+		//setFont(Font.loadFont(new FileInputStream(FONT_PATH), 30));
+	
+	
+	//Font font = Font.loadFont(FONT_PATH, 24);
+	//setFont(font);
+		
+		
 		setFont(Font.font("Verdana",23));
 	}
 	private void setButtonPressedStyle() {

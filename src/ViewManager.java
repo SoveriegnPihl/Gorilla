@@ -7,6 +7,8 @@ import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Group;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
@@ -27,9 +29,11 @@ import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -67,8 +71,9 @@ public class ViewManager {
 	static int[] dimensions = new int[2];
 	Stage stage;
 	int gameWidth = 600;
-	int gameHeight = 600;
-	public Main game = new Main();
+	int gameHeight = 300;
+
+	
 	@FXML
 	TextField height;
 	
@@ -79,6 +84,7 @@ public class ViewManager {
 	Label pixels;
 	
 	public simulation graph = new simulation();
+	public Main game = new Main();
 	
 	private final static int MENU_BUTTONS_START_X = 100;
 	private final static int MENU_BUTTONS_START_Y = 150;
@@ -122,7 +128,6 @@ public class ViewManager {
 	private void createStartButton() throws FileNotFoundException {
 		GorillaButton startButton = new GorillaButton ("PLAY");
 		addMenuButton(startButton);
-		
 		
 		startButton.setOnAction(new EventHandler<ActionEvent>(){
 			
@@ -176,6 +181,14 @@ public class ViewManager {
 		        angle.setPromptText("VINKEL");
 		        speed.setPromptText("SPEED");
 		        
+		        //vind og tab spillet vindue
+				Button next = new Button("Nyt spil");
+				Button logout = new Button("Luk spillet");
+		    	VBox in = new VBox();
+		        in.setPadding(new Insets(30, 40, 40, 30));
+		        in.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
+		        in.getChildren().addAll(logout,next);
+		        
 		        //button event
 		        Button button = new Button("Throw Banana");
 		        button.setOnAction(e -> {
@@ -194,143 +207,17 @@ public class ViewManager {
 		    		//runder
 					context.setFill(Color.YELLOW);
 					context.setFont(new Font("Arial", 36));
+							
 					if (rounds%2 == 0) {
 						context.fillText("Runde: " + rounds, gameWidth/2 - 70, 35);
-						rounds++;
-						if(pointsM1 == 3) {
-							context.clearRect(0, 0, gameWidth, gameHeight);
-							context.setFill(Color.BLUE);
-				    		context.fillRect(0, 0, gameWidth, gameWidth);
-				    		context.setFill(Color.YELLOW);
-				    		context.setFont(new Font("Arial", 20));
-					    	context.fillText("Tillykke abe 1, du har vundet spillet!", gameWidth/2 - 150, 35);
-					    	
-					    	
-					    	Button next = new Button("Nyt spil");
-					    	Button logout = new Button("Luk spillet");
-					    
-					    
-					    	VBox in = new VBox();
-					        in.setPadding(new Insets(30, 40, 40, 30));
-					        in.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
-					        in.getChildren().addAll(logout,next);
-					        root.setTop(in);
-					    	
-					        next.setOnAction(f -> {
-					        	pointsM1 = 0;
-					        	pointsM2 = 0;
-					        	game.start(stage);
-					        });
-					    	
-					        
-					        logout.setOnAction(d -> {
-					        	stage.close();
-					        });
-					    	
-					    
-						}
-						if(pointsM2 == 3) {
-							context.clearRect(0, 0, gameWidth, gameHeight);
-							context.setFill(Color.BLUE);
-				    		context.fillRect(0, 0, gameWidth, gameWidth);
-				    		context.setFill(Color.YELLOW);
-				    		context.setFont(new Font("Arial", 20));
-					    	context.fillText("Tillykke abe 2, du har vundet spillet!", gameWidth/2 - 150, 35);
-					    	
-					    	
-					    	Button next = new Button("Nyt spil");
-					    	Button logout = new Button("Luk spillet");
-					    
-					    
-					    	VBox in = new VBox();
-					        in.setPadding(new Insets(30, 40, 40, 30));
-					        in.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
-					        in.getChildren().addAll(logout,next);
-					        root.setTop(in);
-					    	
-					        next.setOnAction(f -> {
-					        	pointsM1 = 0;
-					        	pointsM2 = 0;
-					        	game.start(stage);
-					        });
-					    	
-					        
-					        logout.setOnAction(d -> {
-					        	stage.close();
-					        });
-					    	}
-						
+						rounds++;						
 					}
+					
 					else {
 						context.fillText("Runde: " + rounds, gameWidth/2 - 70, 35);
-						rounds++;
-						if(pointsM1 == 3) {
-							context.clearRect(0, 0, gameWidth, gameHeight);
-							context.setFill(Color.BLUE);
-				    		context.fillRect(0, 0, gameWidth, gameWidth);
-				    		context.setFill(Color.YELLOW);
-				    		context.setFont(new Font("Arial", 20));
-					    	context.fillText("Tillykke abe 1, du har vundet spillet!", gameWidth/2 - 150, 35);
-					    	
-					    	
-					    	Button next = new Button("Nyt spil");
-					    	Button logout = new Button("Luk spillet");
-					    
-					    
-					    	VBox in = new VBox();
-					        in.setPadding(new Insets(30, 40, 40, 30));
-					        in.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
-					        in.getChildren().addAll(logout,next);
-					        root.setTop(in);
-					    	
-					        next.setOnAction(f -> {
-					        	pointsM1 = 0;
-					        	pointsM2 = 0;
-					        	game.start(stage);
-					        });
-					    	
-					        
-					        logout.setOnAction(d -> {
-					        	stage.close();
-					        });
-					    	
-						}
-						if(pointsM2 == 3) {
-							context.clearRect(0, 0, gameWidth, gameHeight);
-							context.setFill(Color.BLUE);
-				    		context.fillRect(0, 0, gameWidth, gameWidth);
-				    		context.setFill(Color.YELLOW);
-				    		context.setFont(new Font("Arial", 20));
-					    	context.fillText("Tillykke abe 2, du har vundet spillet!", gameWidth/2 - 150, 35);
-					    	
-					    	
-					    	Button next = new Button("Nyt spil");
-					    	Button logout = new Button("Luk spillet");
-					    
-					    
-					    	VBox in = new VBox();
-					        in.setPadding(new Insets(30, 40, 40, 30));
-					        in.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
-					        in.getChildren().addAll(logout,next);
-					        root.setTop(in);
-					    	
-					        next.setOnAction(f -> {
-					        	pointsM1 = 0;
-					        	pointsM2 = 0;
-					        	game.start(stage);
-					        });
-					    	
-					        
-					        logout.setOnAction(d -> {
-					        	stage.close();
-					        });
-					    	
-					    	
-					    	}
-					
+						rounds++;			    					
 					}
-		    		
-		    		
+					
 					//tegner aber
 		            monkey1.render(context);
 					monkey2.render(context);
@@ -344,11 +231,55 @@ public class ViewManager {
 						graph.draw(dot, context, monkey1, monkey2, rounds);
 					}
 					
+					if(pointsM1 == 3) {
+						context.setFill(Color.BLUE);
+			    		context.fillRect(0, 0, gameWidth, gameWidth);
+			    		context.setFill(Color.YELLOW);
+			    		context.setFont(new Font("Arial", 20));
+				    	context.fillText("Tillykke abe 1, du har vundet spillet!", gameWidth/2 - 150, 35);
+	
+				        root.setTop(in);
+				    	
+				        next.setOnAction(f -> {
+				        	pointsM1 = 0;
+				        	pointsM2 = 0;
+				        	stage.close();
+				        	game.start(stage);
+				        });
+				    	
+				        	logout.setOnAction(d -> {
+				        	stage.close();
+				        });
+				    					    
+					}
+					if(pointsM2 == 3) {
+						context.setFill(Color.BLUE);
+			    		context.fillRect(0, 0, gameWidth, gameWidth);
+			    		context.setFill(Color.YELLOW);
+			    		context.setFont(new Font("Arial", 20));
+				    	context.fillText("Tillykke abe 2, du har vundet spillet!", gameWidth/2 - 150, 35);
+				    
+				    	root.setTop(in);
+				    	
+				        next.setOnAction(f -> {
+				        	pointsM1 = 0;
+				        	pointsM2 = 0;
+				        	stage.close();
+				        	game.start(stage);
+				        });
+				    					        
+				        logout.setOnAction(d -> {
+				        	stage.close();
+				        });
+				    	}
+					
 					//point tekst
 					context.setFill(Color.YELLOW);
 					context.setFont(new Font("Arial", 36));
 					context.fillText(""+pointsM1, 10, 35);
 					context.fillText(""+pointsM2, gameWidth-37, 35);
+					
+					
 		        });
 		        
 		        //tegner 
@@ -383,21 +314,13 @@ public class ViewManager {
 			}
 		
 		public boolean is_int(String message) {
-		        
 		        try {
-		            int age = Integer.parseInt(message);
-		 
+		        	int age = Integer.parseInt(message);
 		            return true;
 		        }catch(NumberFormatException e) {
 		       }
-		    
 		        return false;
-		    
-		   
-		    }
-		    
-		   
-				
+		    }	
 		});
 	}
 
@@ -405,25 +328,134 @@ public class ViewManager {
 		GorillaButton scoresButton = new GorillaButton ("SCORES");
 		addMenuButton(scoresButton);
 	}
+	
+	private void createMenuButton() throws FileNotFoundException{
+		GorillaButton menu = new GorillaButton ("Menu");
+		addMenuButton(menu);
+		
+		menu.setOnAction(j -> {
+			stage.close();
+			game.start(stage);
+			
+		});
+		
+	}
+	
 	private void createHelpButton() throws FileNotFoundException {
 		GorillaButton helpButton = new GorillaButton ("HELP");
 		addMenuButton(helpButton);
+		
+	helpButton.setOnAction(g -> {
+			mainStage.close();
+			
+			Stage help = new Stage();
+			Pane mainPane = new Pane();
+			Scene helpScene = new Scene(mainPane, WIDTH, HEIGHT);
+			
+			//createBackground();
+			Image backgroundImage = new Image ("background.jpg",256,256,false,true);
+			BackgroundImage background = new BackgroundImage(backgroundImage, BackgroundRepeat.REPEAT,BackgroundRepeat.REPEAT,BackgroundPosition.DEFAULT,null);
+			mainPane.setBackground(new Background(background));
+			
+			
+		
+			try {
+				createMenuButton();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+			
+			Text guideOverskrift = new Text();
+			guideOverskrift.setText("Instructions");
+			guideOverskrift.setFont(Font.font("Verdana", 40));
+			guideOverskrift.setFill(Color.WHITE);
+			guideOverskrift.setX(WIDTH/2 - 120);
+			guideOverskrift.setY(HEIGHT/6);
+			
+			
+			
+			Text guide = new Text();
+			guide.setText(" The gorilla game is fun and easy to learn! "
+						+ "\n You are playing as a monkey and your goal "
+						+ "\n is to hit your opponents with your bananas before they hit you. "
+						+ "\n In order to throw your banana you have to "
+						+ "\n choose an angle and a speed for the throw."
+						+ "\n "
+						
+						);
+			guide.setFont(Font.font("Verdana",20));
+			guide.setFill(Color.WHITE);
+			guide.setX(WIDTH/8);
+			guide.setY(HEIGHT/4);
+			
+			Button menu = new Button("Menu");
+	
+			menu.setLayoutX(WIDTH/2 -120);
+			menu.setLayoutY(HEIGHT*0.8);
+			
+			menu.setOnAction(j -> {
+				help.close();
+				game.start(stage);
+				
+			});
+			
+			mainPane.getChildren().addAll(menu,guide,guideOverskrift);
+			
+			
+	
+			help.setScene(helpScene);
+			help.show();
+			
+			
+			
+		});
 	}
 	private void createCreditsButton() throws FileNotFoundException {
 		GorillaButton creditsButton = new GorillaButton ("CREDITS");
 		addMenuButton(creditsButton);
+		
+		creditsButton.setOnAction(k -> {
+			mainStage.close();
+			
+			Stage help = new Stage();
+			BorderPane mainPane = new BorderPane();
+			BorderPane bottom = new BorderPane();
+			Scene creditsScene = new Scene(mainPane, WIDTH, HEIGHT);
+			
+			//createBackground();
+			
+			Image backgroundImage = new Image ("background.jpg",256,256,false,true);
+			BackgroundImage background = new BackgroundImage(backgroundImage, BackgroundRepeat.REPEAT,BackgroundRepeat.REPEAT,BackgroundPosition.DEFAULT,null);
+			mainPane.setBackground(new Background(background));
+			
+			try {
+				createMenuButton();
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+		
+
+			help.setScene(creditsScene);
+			help.show();
+			
+		});
+		
+		
 	}
+		
+		
 	private void createExitButton() throws FileNotFoundException {
 		GorillaButton exitButton = new GorillaButton ("EXIT");
 		addMenuButton(exitButton);
 		
 		exitButton.setOnAction(d -> {
-        	stage.close();
+        	mainStage.close();
         });
 	}
-	
-	
-	
 	
 	private void createBackground() {
 		Image backgroundImage = new Image ("background.jpg",256,256,false,true);
@@ -432,13 +464,10 @@ public class ViewManager {
 	}
 
 	 public static void inc_m1() {
-		    	pointsM1++;
-		    }
+	   	pointsM1++;
+	    }
 	  
 	    public static void inc_m2() {
-	    	pointsM2++;
+    	pointsM2++;
 	    }
 }
-
-
-

@@ -40,5 +40,8 @@ public class Sprite {
 	public Image getImage() {
 		return this.image;
 	}
+	public String toString() {
+		return "hej"+position.x;
+	}
 
 }

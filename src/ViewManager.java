@@ -27,9 +27,11 @@ import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.application.Application;
 import javafx.event.ActionEvent;
@@ -60,20 +62,19 @@ public class ViewManager {
 	private AnchorPane mainPane;
 	private Scene mainScene;
 	private Stage mainStage;
+	Stage gameStage = new Stage();
+	private final String FONT_PATH = "kenvector_future.ttf";
 	
-	int angleVal, velocityVal, pointsMonkey1, pointsMonkey2,gameWidth,gameHeight;
-	int rounds = 1;
+	int gameWidth,gameHeight;
 	static int pointsM1, pointsM2;
 	static int[] dimensions = new int[2];
 	Stage stage;
-	
+	Stage stage1;
 	TextField height, width;
 	Label info;
 	
-
-	
-	public simulation graph = new simulation();
 	public Main game = new Main();
+	Scene gameScene;
 	
 	private final static int MENU_BUTTONS_START_X = 100;
 	private final static int MENU_BUTTONS_START_Y = 150;
@@ -89,7 +90,7 @@ public class ViewManager {
 		mainStage = new Stage(); 
 		mainStage.setScene(mainScene);
 		createButtons();
-		createBackground();
+		createBackground(mainPane);
 		createLogo();
 		
 	}
@@ -111,16 +112,20 @@ public class ViewManager {
 		Label lblName = new Label("Please select "+ type+" in pixels"); 
 		lblName.setMinWidth(75); 
 		lblName.setTextFill(Color.WHITE);
-	   lblName.setStyle("-fx-font: 24 arial;");
-	   lblName.setLayoutX(850 - 350 );
-		lblName.setLayoutY(y+5);
+		lblName.setFont(Font.loadFont(getClass().getResourceAsStream(FONT_PATH), 18));
+		lblName.setLayoutX(850 - 450 );
+		lblName.setLayoutY(y+7);
+		/*DropShadow shadow = new DropShadow();
+	    shadow.setOffsetY(5.0);
+	    lblName.setEffect(shadow);*/
+	    
 		
 		text.setPrefHeight(40);
 		text.setPrefWidth(200);
         text.setMaxWidth(100);
         text.setLayoutX(x);
 		text.setLayoutY(y);
-		  text.setStyle("-fx-font: 24 arial;");
+		text.setStyle("-fx-font: 24 arial;");
 		  
 		mainPane.getChildren().add(lblName);	
 		mainPane.getChildren().add(text);	
@@ -142,221 +147,147 @@ public class ViewManager {
 		
 		startButton.setOnAction(new EventHandler<ActionEvent>(){
 			
-			@Override
-			public void handle(ActionEvent arg0) {
-				boolean hej = false;
-				if(!(is_int(width.getText()))||!(is_int(height.getText()))) {
-					info.setText("skriv nu det i pixels forhelvede paul"); 	
+		@Override
+		public void handle(ActionEvent arg0) {
+			
+			
+		/*	boolean hej = false;
+			if(!(is_int(width.getText()))||!(is_int(height.getText()))) {
+				info.setText("skriv nu det i pixels forhelvede paul");
 				}
-				else if (Integer.parseInt(width.getText()) > 2000 || Integer.parseInt(height.getText()) > 1000) { 
-					info.setText("Please lower you resolution");
+			else if (Integer.parseInt(width.getText()) > 2000 || Integer.parseInt(height.getText()) > 1000) { 
+				info.setText("Please lower you resolution");
+				} 
+			else if (Integer.parseInt(width.getText()) < 1 || Integer.parseInt(height.getText()) < 1) {
+				info.setText("Please increase your resolution");
+				} 
+			else {
+				hej = true;
+				gameWidth = Integer.parseInt(width.getText());
+				gameHeight =  Integer.parseInt(height.getText()); 
+			}
+			*/
+			 	gameWidth = 800;
+			    gameHeight = 600;
+			    
+				Game spillet = new Game();
+				spillet.spil(gameWidth,gameHeight);
+			
+			
+			//if (hej) {
+				mainStage.close();
+				gameStage.setScene(spillet.spil(gameWidth,gameHeight));
+				gameStage.show();
 					
-				} else if (Integer.parseInt(width.getText()) < 1 || Integer.parseInt(height.getText()) < 1) {
-					info.setText("Please increase your resolution");
-				} else {
-					hej = true;
-					gameWidth = Integer.parseInt(width.getText());
-					gameHeight =  Integer.parseInt(height.getText()); 
-					}
-				
-				stage = (Stage)((Node)arg0.getSource()).getScene().getWindow();
 				
 			
+				
+		}
+	public boolean is_int(String message) {	
+			try {
+				int age = Integer.parseInt(message);
+			    return true;
 			    
-				//Start indstillinger
-			    BorderPane root = new BorderPane();
-			    Scene mainScene = new Scene(root);
-				Canvas canvas = new Canvas(gameWidth, gameHeight);
-				GraphicsContext context = canvas.getGraphicsContext2D();
-				stage.setTitle("Simp Gorillas");
-			    
-				//elementer der skal indsættes
-				//baggrund
-				root.setCenter(canvas);
-				context.setFill(Color.BLUE);
-				context.fillRect(0, 0, gameWidth, gameHeight);
-				
-				//monkey 1
-				Sprite monkey1 = new Sprite();
-				monkey1.position.set(8, gameHeight - 60);
-				monkey1.setImage("monkey_throw.png");
-						
-				//monkey 2
-				Sprite monkey2 = new Sprite();
-				monkey2.position.set(gameWidth - 90, gameHeight - 60);
-				monkey2.setImage("monkey_throw2.png");
-				
-				//banekurve dot
-				Sprite dot = new Sprite();
-				dot.position.set(8, gameHeight-80);
-				dot.setImage("dot.png");
-				
-				//vinkel og fart vindue
-		        int width_of_field = 100;
-				TextField angle = new TextField();
-		        TextField speed = new TextField();
-		        angle.setPrefWidth(width_of_field);
-		        angle.setMaxWidth(width_of_field);
-		        speed.setPrefWidth(width_of_field);
-		        speed.setMaxWidth(width_of_field);
-		        angle.setPromptText("VINKEL");
-		        speed.setPromptText("SPEED");
-		        
-		        //vind og tab spillet vindue
-				Button next = new Button("Nyt spil");
-				Button logout = new Button("Luk spillet");
-		    	VBox in = new VBox();
-		        in.setPadding(new Insets(30, 40, 40, 30));
-		        in.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
-		        in.getChildren().addAll(logout,next);
-		        
-		        //button event
-		        Button button = new Button("Throw Banana");
-		        button.setOnAction(e -> {
-		            if(is_int(angle.getText())) {
-		                angleVal = Integer.parseInt(angle.getText());
-		            }
-		            if(is_int(speed.getText())) {
-		                velocityVal = Integer.parseInt(speed.getText());
-		            }
-		            
-		            //clear baggrund
-		            context.setFill(Color.BLUE);
-		    		context.fillRect(0, 0, gameWidth, gameWidth);
-		    		
-		    		//runder
-		    		//runder
-					context.setFill(Color.YELLOW);
-					context.setFont(new Font("Arial", 36));
-							
-					if (rounds%2 == 0) {
-						context.fillText("Runde: " + rounds, gameWidth/2 - 70, 35);
-						rounds++;						
-					}
-					
-					else {
-						context.fillText("Runde: " + rounds, gameWidth/2 - 70, 35);
-						rounds++;			    					
-					}
-					
-					//tegner aber
-		            monkey1.render(context);
-					monkey2.render(context);
-					
-					//point tæller
-					if (rounds%2 == 0) {
-						graph.setup(angleVal, velocityVal, 6, gameHeight - 50);
-						graph.draw(dot, context, monkey1, monkey2, rounds);
-					}else {
-						graph.setup(180 - angleVal, velocityVal, gameWidth - 6, gameHeight - 50 );
-						graph.draw(dot, context, monkey1, monkey2, rounds);
-					}
-					
-					if(pointsM1 == 3) {
-						context.setFill(Color.BLUE);
-			    		context.fillRect(0, 0, gameWidth, gameWidth);
-			    		context.setFill(Color.YELLOW);
-			    		context.setFont(new Font("Arial", 20));
-				    	context.fillText("Tillykke abe 1, du har vundet spillet!", gameWidth/2 - 150, 35);
-	
-				        root.setTop(in);
-				    	
-				        next.setOnAction(f -> {
-				        	pointsM1 = 0;
-				        	pointsM2 = 0;
-				        	game.start(stage);
-				        });
-				    	
-				        	logout.setOnAction(d -> {
-				        	stage.close();
-				        });
-				    					    
-					}
-					if(pointsM2 == 3) {
-						context.setFill(Color.BLUE);
-			    		context.fillRect(0, 0, gameWidth, gameWidth);
-			    		context.setFill(Color.YELLOW);
-			    		context.setFont(new Font("Arial", 20));
-				    	context.fillText("Tillykke abe 2, du har vundet spillet!", gameWidth/2 - 150, 35);
-				    
-				    	root.setTop(in);
-				    	
-				        next.setOnAction(f -> {
-				        	pointsM1 = 0;
-				        	pointsM2 = 0;
-				        	game.start(stage);
-				        });
-				    					        
-				        logout.setOnAction(d -> {
-				        	stage.close();
-				        });
-				    	}
-					
-					//point tekst
-					context.setFill(Color.YELLOW);
-					context.setFont(new Font("Arial", 36));
-					context.fillText(""+pointsM1, 10, 35);
-					context.fillText(""+pointsM2, gameWidth-37, 35);
-					
-					
-		        });
-		        
-		        //tegner 
-		        //vinkel og fart box
-		        VBox get_numbers = new VBox();
-		        get_numbers.setPadding(new Insets(20, 20, 20, 20));
-		        get_numbers.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
-		        get_numbers.getChildren().addAll(angle, speed, button);
-		        root.setTop(get_numbers);
-		        
-		        //tegner pointscore
-				context.setFill(Color.YELLOW);
-				context.setFont(new Font("Arial", 36));
-				context.fillText("0", 10, 35);
-				context.fillText("0", gameWidth-37, 35);
-				
-				//tegner aber
-		        monkey1.render(context);
-				monkey2.render(context);
-				
-				if (hej) {
-					stage.setScene(mainScene);
-					stage.show();
-		
-				}
-			}
-		
-			 public boolean is_int(String message) {
-			        
-			        try {
-			            int age = Integer.parseInt(message);
-			           
-			            return true;
-			        }catch(NumberFormatException e) {
+			}catch(NumberFormatException e) {
 			       }
 			        return false;
-			 }
-			 });
+			        }
+			});
 		
-	}
+		}
 	private void createScoresButton() throws FileNotFoundException {
 		GorillaButton scoresButton = new GorillaButton ("SCORES");
 		addMenuButton(scoresButton);
 	}
+
+	private void createMenuButton() throws FileNotFoundException{
+		GorillaButton menu = new GorillaButton ("Menu");
+		addMenuButton(menu);
+			
+		menu.setOnAction(j -> {
+			stage.close();
+			game.start(stage);
+				
+		});
+			
+	}
+		
 	private void createHelpButton() throws FileNotFoundException {
 		GorillaButton helpButton = new GorillaButton ("HELP");
 		addMenuButton(helpButton);
+			
+		helpButton.setOnAction(g -> {
+		mainStage.close();
+				
+			
+		Stage help = new Stage();
+		AnchorPane mainPane = new AnchorPane();
+		Scene helpScene = new Scene(mainPane, WIDTH, HEIGHT);
+				
+		createBackground(mainPane);
+				
+		Text guideOverskrift = new Text();
+		guideOverskrift.setText("Instructions");
+		guideOverskrift.setFont(Font.loadFont(getClass().getResourceAsStream(FONT_PATH), 40));
+		guideOverskrift.setFill(Color.WHITE);
+		guideOverskrift.setX(WIDTH/2 - 150);
+		guideOverskrift.setY(HEIGHT/6);
+				
+		Text guide = new Text();
+		guide.setText(" The gorilla game is fun and easy to learn! "
+							+ "\n You are playing as a monkey and your goal "
+							+ "\n is to hit your opponents with your bananas before they hit you. "
+							+ "\n In order to throw your banana you have to "
+							+ "\n choose an angle and a speed for the throw."
+							+ "\n ");
+			
+		guide.setFont(Font.loadFont(getClass().getResourceAsStream(FONT_PATH), 18));
+		guide.setFill(Color.WHITE);
+		guide.setX(WIDTH/8);
+		guide.setY(HEIGHT/4);
+				
+		GorillaButton menuHelpButton = new GorillaButton ("MENU");
+
+				
+		menuHelpButton.setLayoutX(130);
+		menuHelpButton.setLayoutY(400);
+				
+		menuHelpButton.setOnAction(j -> {
+		help.close();
+		game.start(stage);
+		});
+			
+		mainPane.getChildren().addAll(menuHelpButton,guide,guideOverskrift);
+		
+		help.setScene(helpScene);
+		help.show();
+		});
 	}
+		
 	private void createCreditsButton() throws FileNotFoundException {
 		GorillaButton creditsButton = new GorillaButton ("CREDITS");
 		addMenuButton(creditsButton);
+			
+		creditsButton.setOnAction(k -> {
+			mainStage.close();
+				
+			Stage help = new Stage();
+			BorderPane mainPane = new BorderPane();
+			Scene creditsScene = new Scene(mainPane, WIDTH, HEIGHT);
+				
+			createBackground(mainPane);
+
+			help.setScene(creditsScene);
+			help.show();
+		});
 	}
+		
 	private void createExitButton() throws FileNotFoundException {
 		GorillaButton exitButton = new GorillaButton ("EXIT");
 		addMenuButton(exitButton);
 		
 		exitButton.setOnAction(d -> {
-        	stage.close();
+        	mainStage.close();
         });
 	}
 	
@@ -365,9 +296,14 @@ public class ViewManager {
 		info = new Label("Please select your preffered settings");
 		info.setMinWidth(75); 
 		info.setTextFill(Color.WHITE);
-		info.setStyle("-fx-font: 24 arial;");
-		info.setLayoutX(850 - 350 );
+		info.setFont(Font.loadFont(getClass().getResourceAsStream(FONT_PATH), 20));
+		info.setLayoutX(850 - 450 );
 		info.setLayoutY(225);
+		DropShadow shadow = new DropShadow();
+	    shadow.setOffsetY(5.0);
+	    shadow.setOffsetX(5.0);
+	    info.setEffect(shadow);
+	    
 		mainPane.getChildren().add(info);	
 		
 		
@@ -375,16 +311,16 @@ public class ViewManager {
 			addTextfields(width,850, 400, "width");
 			
 
-			height = new TextField();
+		height = new TextField();
 			addTextfields(height,850, 300,"height");
 	       
 
 	}
 	
-	private void createBackground() {
+	private void createBackground(Pane pane) {
 		Image backgroundImage = new Image ("background.jpg",256,256,false,true);
 		BackgroundImage background = new BackgroundImage(backgroundImage, BackgroundRepeat.REPEAT,BackgroundRepeat.REPEAT,BackgroundPosition.DEFAULT,null);
-		mainPane.setBackground(new Background(background));
+		pane.setBackground(new Background(background));
 		
 	}
 	
@@ -414,18 +350,34 @@ public class ViewManager {
 		mainPane.getChildren().add(logo);
 		
 	}
-	
-	
 
+	    public boolean is_int(String message) {
+	        
+	        try {
+	            int age = Integer.parseInt(message);
+	           
+	            return true;
+	        }catch(NumberFormatException e) {
+	       }
+	        return false;
+	 }
 
-	 public static void inc_m1() {
-	   	pointsM1++;
-	    }
+		public void close() {
+			gameStage.close();
+			
+		}
+		
+
+		public double getWidth() {
+			
+			return 600.0;
+		}
+
+		public double getHeight() {
+			return 600.0;
+		}
+
 	  
-	    public static void inc_m2() {
-    	pointsM2++;
-	   
 	}
-}
 
 

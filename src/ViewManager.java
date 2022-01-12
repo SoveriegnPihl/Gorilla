@@ -13,7 +13,10 @@ import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.scene.effect.DropShadow;
@@ -62,26 +65,20 @@ public class ViewManager {
 	private static final int HEIGHT = 768;
 	private static final int WIDTH = 1024;
 	private AnchorPane mainPane;
+	
 	private Scene mainScene;
 	private Stage mainStage;
 	
-	int angleVal, velocityVal, pointsMonkey1, pointsMonkey2;
+	int angleVal, velocityVal, pointsMonkey1, pointsMonkey2,gameWidth,gameHeight;
 	int rounds = 1;
 	static int pointsM1, pointsM2;
 	static int[] dimensions = new int[2];
 	Stage stage;
-	int gameWidth = 600;
-	int gameHeight = 300;
+	
+	TextField height, width;
+	Label info;
+	
 
-	
-	@FXML
-	TextField height;
-	
-	@FXML 
-	TextField width;
-	
-	@FXML 
-	Label pixels;
 	
 	public simulation graph = new simulation();
 	public Main game = new Main();
@@ -91,7 +88,6 @@ public class ViewManager {
 	
 	List<GorillaButton> menuButtons;
 	
-	
 	public ViewManager() throws FileNotFoundException {
 		menuButtons = new ArrayList<>();
 		mainPane = new AnchorPane();
@@ -99,7 +95,12 @@ public class ViewManager {
 		mainStage = new Stage(); 
 		mainStage.setScene(mainScene);
 		createButtons();
-		createBackground();
+		createBackground(mainPane);
+		mainStage.setOnCloseRequest(e -> {
+			e.consume();
+			logout(mainStage);
+			
+			});
 		
 	}
 	
@@ -115,12 +116,31 @@ public class ViewManager {
 		mainPane.getChildren().add(button);
 		 
 	}
+	private void addTextfields(TextField text, int x, int y, String type) {
+		text.setPromptText("500");
+		Label lblName = new Label("Please select "+ type+" in pixels"); 
+		lblName.setMinWidth(75); 
+		lblName.setTextFill(Color.WHITE);
+		lblName.setStyle("-fx-font: 24 arial;");
+		lblName.setLayoutX(850 - 350 );
+		lblName.setLayoutY(y+5);
+		
+		text.setPrefHeight(40);
+		text.setPrefWidth(200);
+        text.setMaxWidth(100);
+        text.setLayoutX(x);
+		text.setLayoutY(y);
+		text.setStyle("-fx-font: 24 arial;");
+		  
+		//mainPane.getChildren().add(lblName);	
+		//mainPane.getChildren().add(text);	
+	}
 	
 	private void createButtons() throws FileNotFoundException {
 		createStartButton();
 		createScoresButton();	
 		createHelpButton();
-		createCreditsButton();
+		createSettingsButton();
 		createExitButton();
 
 	}
@@ -133,6 +153,24 @@ public class ViewManager {
 			
 			@Override
 			public void handle(ActionEvent arg0) {
+				
+				boolean hej = false;
+				if(!(is_int(width.getText()))||!(is_int(height.getText()))) {
+					info.setText("skriv nu det i pixels forhelvede paul"); 	
+				}
+				else if (Integer.parseInt(width.getText()) > 2000 || Integer.parseInt(height.getText()) > 1000) { 
+					info.setText("Please lower you resolution");
+					
+				} else if (Integer.parseInt(width.getText()) < 1 || Integer.parseInt(height.getText()) < 1) {
+					info.setText("Please increase your resolution");
+				} else {
+					hej = true;
+					gameWidth = 300;
+					gameHeight = 500;
+					
+					//gameWidth = Integer.parseInt(width.getText());
+					//gameHeight =  Integer.parseInt(height.getText()); 
+					}
 
 				/*if(is_int(width.getText()) && is_int(height.getText())) {
 					gameWidth = Integer.parseInt(width.getText());
@@ -300,6 +338,15 @@ public class ViewManager {
 		        monkey1.render(context);
 				monkey2.render(context);
 				
+				if (hej) {
+					stage.setScene(mainScene);
+					stage.show();
+		
+				}
+				
+				//Logout
+				logout(stage);
+				
 				/*if(!is_int(width.getText())||!is_int(height.getText())) {
 					pixels.setText("skriv nu det i pixels forhelvede paul");
 				} else {
@@ -329,138 +376,226 @@ public class ViewManager {
 		addMenuButton(scoresButton);
 	}
 	
-	private void createMenuButton() throws FileNotFoundException{
-		GorillaButton menu = new GorillaButton ("Menu");
-		addMenuButton(menu);
+	private void createMenuButton(GorillaButton help) throws FileNotFoundException{
 		
-		menu.setOnAction(j -> {
+		help = new GorillaButton ("Menu");
+	
+		help.setLayoutX(WIDTH/2 -120);
+		help.setLayoutY(HEIGHT*0.8);
+		
+		help.setOnAction(j -> {
 			stage.close();
 			game.start(stage);
 			
 		});
 		
 	}
-	
 	private void createHelpButton() throws FileNotFoundException {
-		GorillaButton helpButton = new GorillaButton ("HELP");
-		addMenuButton(helpButton);
-		
-	helpButton.setOnAction(g -> {
-			mainStage.close();
-			
-			Stage help = new Stage();
-			Pane mainPane = new Pane();
-			Scene helpScene = new Scene(mainPane, WIDTH, HEIGHT);
-			
-			//createBackground();
-			Image backgroundImage = new Image ("background.jpg",256,256,false,true);
-			BackgroundImage background = new BackgroundImage(backgroundImage, BackgroundRepeat.REPEAT,BackgroundRepeat.REPEAT,BackgroundPosition.DEFAULT,null);
-			mainPane.setBackground(new Background(background));
-			
-			
-		
-			try {
-				createMenuButton();
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		
-			
-			Text guideOverskrift = new Text();
-			guideOverskrift.setText("Instructions");
-			guideOverskrift.setFont(Font.font("Verdana", 40));
-			guideOverskrift.setFill(Color.WHITE);
-			guideOverskrift.setX(WIDTH/2 - 120);
-			guideOverskrift.setY(HEIGHT/6);
-			
-			
-			
-			Text guide = new Text();
-			guide.setText(" The gorilla game is fun and easy to learn! "
-						+ "\n You are playing as a monkey and your goal "
-						+ "\n is to hit your opponents with your bananas before they hit you. "
-						+ "\n In order to throw your banana you have to "
-						+ "\n choose an angle and a speed for the throw."
-						+ "\n "
-						
-						);
-			guide.setFont(Font.font("Verdana",20));
-			guide.setFill(Color.WHITE);
-			guide.setX(WIDTH/8);
-			guide.setY(HEIGHT/4);
-			
-			Button menu = new Button("Menu");
+        GorillaButton helpButton = new GorillaButton ("HELP");
+        addMenuButton(helpButton);
+        
+            helpButton.setOnAction(g -> {
+            mainStage.close();
+            
+        
+            Stage help = new Stage();
+            AnchorPane mainPane = new AnchorPane();
+            Scene helpScene = new Scene(mainPane, WIDTH, HEIGHT);
+            
+            createBackground(mainPane);
+            
+            Text guideOverskrift = new Text();
+            guideOverskrift.setText("Instructions");
+            guideOverskrift.setFont(Font.font("Verdana", 40));
+            guideOverskrift.setFill(Color.WHITE);
+            guideOverskrift.setX(WIDTH/2 - 120);
+            guideOverskrift.setY(HEIGHT/6);
+            
+            
+            Text guide = new Text();
+            guide.setText(" The gorilla game is fun and easy to learn! "
+                        + "\n You are playing as a monkey and your goal "
+                        + "\n is to hit your opponents with your bananas before they hit you. "
+                        + "\n In order to throw your banana you have to "
+                        + "\n choose an angle and a speed for the throw."
+                        + "\n "
+                        
+                        );
+            guide.setFont(Font.font("Verdana",20));
+            guide.setFill(Color.WHITE);
+            guide.setX(WIDTH/8);
+            guide.setY(HEIGHT/4);
+            
+            GorillaButton menuHelpButton = null;
+            try {
+                menuHelpButton = new GorillaButton ("MENU");
+                
+                menuHelpButton.setLayoutX(130);
+                menuHelpButton.setLayoutY(400);
+                
+                menuHelpButton.setOnAction(j -> {
+                    help.close();
+                    game.start(stage);
+                    
+                });
+                
+                
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            
+          
+            mainPane.getChildren().addAll(menuHelpButton,guide,guideOverskrift);
+    
+            help.setScene(helpScene);
+            help.show();
+            
+        });
+    }
 	
-			menu.setLayoutX(WIDTH/2 -120);
-			menu.setLayoutY(HEIGHT*0.8);
-			
-			menu.setOnAction(j -> {
-				help.close();
-				game.start(stage);
-				
-			});
-			
-			mainPane.getChildren().addAll(menu,guide,guideOverskrift);
-			
-			
-	
-			help.setScene(helpScene);
-			help.show();
-			
-			
-			
-		});
-	}
-	private void createCreditsButton() throws FileNotFoundException {
-		GorillaButton creditsButton = new GorillaButton ("CREDITS");
-		addMenuButton(creditsButton);
-		
-		creditsButton.setOnAction(k -> {
-			mainStage.close();
-			
-			Stage help = new Stage();
-			BorderPane mainPane = new BorderPane();
-			BorderPane bottom = new BorderPane();
-			Scene creditsScene = new Scene(mainPane, WIDTH, HEIGHT);
-			
-			//createBackground();
-			
-			Image backgroundImage = new Image ("background.jpg",256,256,false,true);
-			BackgroundImage background = new BackgroundImage(backgroundImage, BackgroundRepeat.REPEAT,BackgroundRepeat.REPEAT,BackgroundPosition.DEFAULT,null);
-			mainPane.setBackground(new Background(background));
-			
-			try {
-				createMenuButton();
-			} catch (FileNotFoundException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-		
+	private void createSettingsButton() throws FileNotFoundException {
+		GorillaButton creditsButton = new GorillaButton ("SETTINGS");
+        addMenuButton(creditsButton);
 
-			help.setScene(creditsScene);
-			help.show();
-			
-		});
-		
-		
+        creditsButton.setOnAction(k -> {
+            mainStage.close();
+
+            Stage help = new Stage();
+            AnchorPane mainPane = new AnchorPane();
+            Scene creditsScene = new Scene(mainPane, WIDTH, HEIGHT);
+
+            createBackground(mainPane);
+            
+            Text guideOverskrift = new Text();
+            guideOverskrift.setText("Settings");
+            guideOverskrift.setFont(Font.font("Verdana", 40));
+            guideOverskrift.setFill(Color.WHITE);
+            guideOverskrift.setX(WIDTH/2 - 110);
+            guideOverskrift.setY(HEIGHT/6);
+
+            createTextFields(mainPane);
+            
+            
+            
+        	
+    		Label lblName = new Label("Please select height in pixels");
+    		Label lbName = new Label("Please select width in pixels");
+    		
+    		lblName.setMinWidth(75); 
+    		lblName.setTextFill(Color.WHITE);
+    		lblName.setStyle("-fx-font: 24 arial;");
+    		lblName.setLayoutX(850 - 350 );
+    		lblName.setLayoutY(303);
+ 
+    		lbName.setMinWidth(75); 
+    		lbName.setTextFill(Color.WHITE);
+    		lbName.setStyle("-fx-font: 24 arial;");
+    		lbName.setLayoutX(850 - 350 );
+    		lbName.setLayoutY(405);
+         
+    		info = new Label("Please select your preffered settings");
+    		info.setMinWidth(75); 
+    		info.setTextFill(Color.WHITE);
+    		info.setStyle("-fx-font: 24 arial;");
+    		info.setLayoutX(850 - 350 );
+    		info.setLayoutY(225);
+    		
+    		
+    		
+    		width = new TextField();
+    			addTextfields(width,850, 400, "width");
+    			
+
+    			height = new TextField();
+    			addTextfields(height,850, 300,"height");
+    	       
+    			 GorillaButton startHelpButton = null;
+    			try {
+    				startHelpButton = new GorillaButton("START");
+    				
+    				createStartButton();
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+    			
+    			
+            GorillaButton menuHelpButton = null;
+            try {
+                menuHelpButton = new GorillaButton ("MENU");
+                
+                menuHelpButton.setLayoutX(130);
+                menuHelpButton.setLayoutY(400);
+                
+                menuHelpButton.setOnAction(j -> {
+                    help.close();
+                    game.start(stage);
+                    
+                });
+                
+                
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+            
+            mainPane.getChildren().addAll(menuHelpButton,guideOverskrift, lblName,lbName,info,width,height,startHelpButton);
+            
+            help.setScene(creditsScene);
+            help.show();
+
+        });
+    
 	}
 		
+	
 		
 	private void createExitButton() throws FileNotFoundException {
 		GorillaButton exitButton = new GorillaButton ("EXIT");
 		addMenuButton(exitButton);
 		
 		exitButton.setOnAction(d -> {
-        	mainStage.close();
+			logout(mainStage);
         });
 	}
 	
-	private void createBackground() {
+	private void logout(Stage mainStage)  {
+			
+			Alert alert = new Alert(AlertType.CONFIRMATION);
+			alert.setTitle("Exit");
+			alert.setHeaderText("Are you sure you want to exit?");
+			
+			if(alert.showAndWait().get() == ButtonType.OK) {
+				mainStage.close();
+			}
+	}
+	
+	private void createTextFields(AnchorPane Pane) {
+		
+		info = new Label("Please select your preffered settings");
+		info.setMinWidth(75); 
+		info.setTextFill(Color.WHITE);
+		info.setStyle("-fx-font: 24 arial;");
+		info.setLayoutX(850 - 350 );
+		info.setLayoutY(225);
+		
+		
+		
+		width = new TextField();
+			addTextfields(width,850, 400, "width");
+			
+
+			height = new TextField();
+			addTextfields(height,850, 300,"height");
+	       
+			Pane.getChildren().addAll(info,width,height);	
+
+	}
+	
+	
+	private void createBackground(AnchorPane Pane) {
 		Image backgroundImage = new Image ("background.jpg",256,256,false,true);
 		BackgroundImage background = new BackgroundImage(backgroundImage, BackgroundRepeat.REPEAT,BackgroundRepeat.REPEAT,BackgroundPosition.DEFAULT,null);
-		mainPane.setBackground(new Background(background));
+		Pane.setBackground(new Background(background));
 	}
 
 	 public static void inc_m1() {

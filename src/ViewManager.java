@@ -1,59 +1,31 @@
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
-
 import javafx.event.ActionEvent;
-import javafx.event.Event;
 import javafx.event.EventHandler;
-import javafx.fxml.FXML;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BackgroundImage;
 import javafx.scene.layout.BackgroundPosition;
 import javafx.scene.layout.BackgroundRepeat;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
-import javafx.application.Application;
-import javafx.event.ActionEvent;
-import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.geometry.Insets;
-import javafx.scene.Node;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.CornerRadii;
-import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.stage.Stage;
+
 
 public class ViewManager {
 
@@ -65,7 +37,8 @@ public class ViewManager {
 	Stage gameStage = new Stage();
 	private final String FONT_PATH = "kenvector_future.ttf";
 	
-	int gameWidth,gameHeight;
+	static int gameWidth;
+	static int gameHeight;
 	static int pointsM1, pointsM2;
 	static int[] dimensions = new int[2];
 	Stage stage;
@@ -81,6 +54,9 @@ public class ViewManager {
 	
 	List<GorillaButton> menuButtons;
 	
+	public Utility util = new Utility();
+	public Game spillet = new Game();
+	
 	
 	
 	public ViewManager() throws FileNotFoundException {
@@ -92,6 +68,11 @@ public class ViewManager {
 		createButtons();
 		createBackground(mainPane);
 		createLogo();
+		mainStage.setOnCloseRequest(e -> {
+			e.consume();
+			logout(mainStage);
+			
+			});
 		
 	}
 	
@@ -135,7 +116,7 @@ public class ViewManager {
 		createStartButton();
 		createScoresButton();	
 		createHelpButton();
-		createCreditsButton();
+		createSettingsButton();
 		createExitButton();
 		createTextFields();
 
@@ -151,8 +132,8 @@ public class ViewManager {
 		public void handle(ActionEvent arg0) {
 			
 			
-		/*	boolean hej = false;
-			if(!(is_int(width.getText()))||!(is_int(height.getText()))) {
+			boolean hej = false;
+			if(!(util.isInt(width.getText()))||!(util.isInt(height.getText()))) {
 				info.setText("skriv nu det i pixels forhelvede paul");
 				}
 			else if (Integer.parseInt(width.getText()) > 2000 || Integer.parseInt(height.getText()) > 1000) { 
@@ -163,35 +144,18 @@ public class ViewManager {
 				} 
 			else {
 				hej = true;
+				System.out.println("what " + Integer.parseInt(width.getText()) + " - " + Integer.parseInt(height.getText()));
 				gameWidth = Integer.parseInt(width.getText());
 				gameHeight =  Integer.parseInt(height.getText()); 
+				System.out.println("the fuck " + gameWidth + " - " + gameHeight);
 			}
-			*/
-			 	gameWidth = 800;
-			    gameHeight = 600;
-			    
-				Game spillet = new Game();
-				spillet.spil(gameWidth,gameHeight);
 			
-			
-			//if (hej) {
+				if (hej) {
 				mainStage.close();
 				gameStage.setScene(spillet.spil(gameWidth,gameHeight));
-				gameStage.show();
+				gameStage.show(); }
 					
-				
-			
-				
 		}
-	public boolean is_int(String message) {	
-			try {
-				int age = Integer.parseInt(message);
-			    return true;
-			    
-			}catch(NumberFormatException e) {
-			       }
-			        return false;
-			        }
 			});
 		
 		}
@@ -248,9 +212,8 @@ public class ViewManager {
 				
 		GorillaButton menuHelpButton = new GorillaButton ("MENU");
 
-				
-		menuHelpButton.setLayoutX(130);
-		menuHelpButton.setLayoutY(400);
+		menuHelpButton.setLayoutX(400);
+		menuHelpButton.setLayoutY(600);
 				
 		menuHelpButton.setOnAction(j -> {
 		help.close();
@@ -264,32 +227,125 @@ public class ViewManager {
 		});
 	}
 		
-	private void createCreditsButton() throws FileNotFoundException {
-		GorillaButton creditsButton = new GorillaButton ("CREDITS");
-		addMenuButton(creditsButton);
-			
-		creditsButton.setOnAction(k -> {
-			mainStage.close();
-				
-			Stage help = new Stage();
-			BorderPane mainPane = new BorderPane();
-			Scene creditsScene = new Scene(mainPane, WIDTH, HEIGHT);
-				
-			createBackground(mainPane);
+	private void createSettingsButton() throws FileNotFoundException {
+		GorillaButton creditsButton = new GorillaButton ("SETTINGS");
+        addMenuButton(creditsButton);
 
-			help.setScene(creditsScene);
-			help.show();
-		});
+        creditsButton.setOnAction(k -> {
+            mainStage.close();
+
+            Stage help = new Stage();
+            AnchorPane mainPane = new AnchorPane();
+            Scene creditsScene = new Scene(mainPane, WIDTH, HEIGHT);
+
+            createBackground(mainPane);
+            
+            Text guideOverskrift = new Text();
+            guideOverskrift.setText("Settings");
+            guideOverskrift.setFont(Font.font("Verdana", 40));
+            guideOverskrift.setFill(Color.WHITE);
+            guideOverskrift.setX(WIDTH/2 - 110);
+            guideOverskrift.setY(HEIGHT/6);
+
+     
+            ChoiceBox<String> gravity = new ChoiceBox();
+            String[] levels = {"Earth","Mars","Moon"};
+            gravity.getItems().addAll(levels);
+            gravity.setLayoutX(130);
+            gravity.setLayoutY(270);
+            gravity.setPrefSize(200, 35);
+            gravity.setOnAction(null);
+            
+            Label gravityLbl = new Label();
+            gravityLbl.setText("Select prefered gravity");
+            gravityLbl.setLayoutX(130);
+            gravityLbl.setLayoutY(225);
+            gravityLbl.setTextFill(Color.WHITE);
+            gravityLbl.setStyle("-fx-font: 24 arial;");
+            
+        	
+    		Label lblName = new Label("Please select height in pixels");
+    		Label lbName = new Label("Please select width in pixels");
+    		
+    		lblName.setMinWidth(75); 
+    		lblName.setTextFill(Color.WHITE);
+    		lblName.setStyle("-fx-font: 18 arial;");
+    		lblName.setLayoutX(850 - 350);
+    		lblName.setLayoutY(303);
+ 
+    		lbName.setMinWidth(75); 
+    		lbName.setTextFill(Color.WHITE);
+    		lbName.setStyle("-fx-font: 18 arial;");
+    		lbName.setLayoutX(850 - 350 );
+    		lbName.setLayoutY(405);
+         
+    		info = new Label("Please select your preffered settings");
+    		info.setMinWidth(75); 
+    		info.setTextFill(Color.WHITE);
+    		info.setStyle("-fx-font: 24 arial;");
+    		info.setLayoutX(850 - 350 );
+    		info.setLayoutY(225);
+    		
+    		
+    		
+    		width = new TextField();
+    			addTextfields(width,850, 400, "width");
+    			
+
+    			height = new TextField();
+    			addTextfields(height,850, 300,"height");
+    	       
+    			// GorillaButton startHelpButton = null;
+    			try {
+    				//startHelpButton = new GorillaButton("START");
+    				
+    				createStartButton();
+				} catch (FileNotFoundException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+    			
+    			
+            GorillaButton menuHelpButton = null;
+            menuHelpButton = new GorillaButton ("MENU");
+			
+			menuHelpButton.setLayoutX(400);
+			menuHelpButton.setLayoutY(600);
+			
+			menuHelpButton.setOnAction(j -> {
+			    help.close();
+			    game.start(stage);
+			    
+			});
+            
+            mainPane.getChildren().addAll(menuHelpButton,guideOverskrift, lblName,lbName,info,width,height, gravity,gravityLbl);
+            
+            help.setScene(creditsScene);
+            help.show();
+
+        });
+    
 	}
+		
 		
 	private void createExitButton() throws FileNotFoundException {
 		GorillaButton exitButton = new GorillaButton ("EXIT");
 		addMenuButton(exitButton);
 		
 		exitButton.setOnAction(d -> {
-        	mainStage.close();
+        	logout(mainStage);
         });
 	}
+private void logout(Stage mainStage)  {
+		
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setTitle("Exit");
+		alert.setHeaderText("Are you sure you want to exit?");
+		
+		if(alert.showAndWait().get() == ButtonType.OK) {
+			mainStage.close();
+		}
+}
 	
 	private void createTextFields() {
 	
@@ -351,33 +407,20 @@ public class ViewManager {
 		
 	}
 
-	    public boolean is_int(String message) {
-	        
-	        try {
-	            int age = Integer.parseInt(message);
-	           
-	            return true;
-	        }catch(NumberFormatException e) {
-	       }
-	        return false;
-	 }
+
 
 		public void close() {
 			gameStage.close();
 			
 		}
 		
-
-		public double getWidth() {
-			
-			return 600.0;
+		public int getWidth() {
+			return gameWidth;
 		}
-
-		public double getHeight() {
-			return 600.0;
+		public int getHeight() {
+			return gameHeight;
 		}
 
 	  
 	}
-
 

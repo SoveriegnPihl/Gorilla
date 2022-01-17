@@ -1,7 +1,4 @@
-import java.io.FileNotFoundException;
-
 import javafx.animation.PathTransition;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -23,6 +20,9 @@ public class simulation {
 	private double time;
 	BorderPane root;
 	private final double GRAVITY = 9.81;
+	int buttonHeights = 189;
+	Sprite Banana;
+	
 	
 	public void setup(int angle, int speed, double x, double y, BorderPane root){
 		this.x = x;
@@ -38,24 +38,15 @@ public class simulation {
 		
 	}
 
-	public void draw(Sprite thrownBanana, GraphicsContext context, Sprite m1, Sprite m2, int round){
+	public void draw(Sprite thrownBanana, Sprite m1, Sprite m2, int round){
 		double Toppunktx = 0;
 		double Toppunkty = 6000;
-
-    	ViewManager manager = null;
-    	
-		try {
-			manager = new ViewManager();
-		} catch (FileNotFoundException e1) {
-			e1.printStackTrace();
-		}
+		Banana = thrownBanana;
 		
 		for(int i = 0; i < 10000; i++){
 			time += 0.1;
 			thrownBanana.position.x = initialX + xVelocity * time;
 			thrownBanana.position.y = initialY - (yVelocity * time - (GRAVITY / 2) * time * time);
-			
-		
 			
 			if(thrownBanana.position.y < Toppunkty) {
 				Toppunkty = thrownBanana.position.y;
@@ -73,12 +64,13 @@ public class simulation {
 					break; }
 			}
 			
-			if(thrownBanana.position.x > manager.getWidth() || thrownBanana.position.y > manager.getHeight() || thrownBanana.position.x < 0) {
+			if(thrownBanana.position.x > ViewManager.gameWidth || thrownBanana.position.y > ViewManager.gameHeight || thrownBanana.position.x < 0) {
 				break;
 			}
-	
+			
 		}
-				
+		
+
 		Image img = new Image("b1.png");
 		ImageView banana = new ImageView(img);
 		
@@ -93,8 +85,8 @@ public class simulation {
 
         Path path = new Path();
         
-        MoveTo moveto= new MoveTo(initialX,initialY + 113);
-        CubicCurveTo cubiccurve= new CubicCurveTo(initialX, initialY + 113, Toppunktx, Toppunkty - 20, thrownBanana.position.x, thrownBanana.position.y + 113);
+        MoveTo moveto= new MoveTo(initialX,initialY + buttonHeights);
+        CubicCurveTo cubiccurve= new CubicCurveTo(initialX, initialY + buttonHeights, Toppunktx, Toppunkty - 20, thrownBanana.position.x, thrownBanana.position.y + buttonHeights);
         
         path.getElements().add(moveto);
         path.getElements().add(cubiccurve);

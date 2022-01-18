@@ -6,6 +6,9 @@ public class Sprite {
 	public Vector velocity;
 	public Rectangle boundary;
 	public Image image;
+	public String imgName;
+	public String name;
+	public int counter = 1;
 	
 	public Sprite() {
 		position = new Vector(0,0);
@@ -18,7 +21,8 @@ public class Sprite {
 	}
 	
 	public void setImage(String filename){
-		image = new Image(filename);
+		imgName = filename;
+		image = new Image(imgName);
 		boundary.width = image.getWidth();
 		boundary.height = image.getHeight();
 	}
@@ -37,11 +41,28 @@ public class Sprite {
 		context.drawImage(image, position.x, position.y);
 	}
 	
-	public Image getImage() {
-		return this.image;
+	public String getName() {
+		return imgName;
 	}
-	public String toString() {
-		return "hej"+position.x;
+
+	public double getWidth() {
+		
+		return boundary.width;
+	}
+
+	public double getXPos() {
+		// TODO Auto-generated method stub
+		return position.x;
+	}
+
+	public double getYPos() {
+		// TODO Auto-generated method stub
+		return position.y;
+	}
+
+	public double getHeight() {
+		// TODO Auto-generated method stub
+		return boundary.height;
 	}
 
 }

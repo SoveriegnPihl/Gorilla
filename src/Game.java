@@ -12,6 +12,8 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
@@ -19,6 +21,7 @@ import javafx.scene.layout.CornerRadii;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Font;
 import javafx.stage.Stage;
@@ -30,60 +33,112 @@ public class Game {
 	int rounds = 1;
 	Scene mainScene;
 	
-	final static ImageView image1 = new ImageView("backny.gif");
 	final static Image image2 = new Image ("mainbackground.png");
 	final static Image image3 = new Image ("3.png");
 	
 	int gameWidth;
 	int gameHeight;
-	
-	private GridPane gridPane1;
-	private GridPane gridPane2;
-	
-	private final static String BACKGROUND = "backny.gif";
 
 	simulation graph = new simulation();
 	Utility util = new Utility();
 	Main game = new Main();
 	Stage primaryStage;
-	BorderPane root = new BorderPane();
+	AnchorPane root = new AnchorPane();
 	BorderPane root1 = new BorderPane();
+	Utility Number;
+	private VBox get_numbers;
+	private static ImageView healthbar;
+	private ImageView healthbar2;
+	private boolean modifierExist;
+	private BonusModifier bonus;
+	
+	private static int counter1 = 0;
+	private static int counter2 = 0;
+	
+	BMP bmp;
+	Building[] buildings;
+	public final static int AMOUNT_OF_BUILDINGS = 10;
 		
-	public Scene spil (int gameWidth, int gameHeight) {
+	public Game (int gameWidth, int gameHeight) {
 		
 		this.gameWidth = gameWidth;
 		this.gameHeight = gameHeight;
+		bmp = new BMP(gameWidth, gameHeight);
+		
+		Image image = new Image("Windows.png");
+		PixelReader reader = image.getPixelReader();
+		
+		
+		buildings = new Building[AMOUNT_OF_BUILDINGS];
+		int offset = 0;
+		
+		double defaultWidth = gameWidth / AMOUNT_OF_BUILDINGS;
+		double[] buildingsWidth = new double[AMOUNT_OF_BUILDINGS];
+		for(int i = 0; i < AMOUNT_OF_BUILDINGS; i++) {
+			buildingsWidth[i] = defaultWidth;
+		}
 	
-		//Start indstillinger
+		for(int i = 0; i < AMOUNT_OF_BUILDINGS; i++) {
+			
+			int widthChange = Utility.getRandomInt(0, gameWidth / 25);
+			buildingsWidth[i] += widthChange;
+			double perBuildingChange = ((double)widthChange) / ((double)AMOUNT_OF_BUILDINGS - 1);
+			for(int j = 0; j < AMOUNT_OF_BUILDINGS; j++) {
+				if(i != j) {
+					buildingsWidth[j] -= perBuildingChange; 
+				}
+			}
+		}
+		
+		for(int i = 0; i < AMOUNT_OF_BUILDINGS - 1 ;i++) {
+			int height = Utility.getRandomInt(gameHeight/5, (int)(gameHeight / 2));
+			int width = (int)buildingsWidth[i];
+			buildings[i] = new Building(width, height, offset, gameHeight, bmp, reader);
+			offset += width;
+		}
+		
+		int height = Utility.getRandomInt(gameHeight/5, (int)(gameHeight / 1.3));
+		buildings[AMOUNT_OF_BUILDINGS - 1] = new Building(gameWidth - offset, height, offset, gameHeight, bmp, reader);
+		
+
+		
+		
+	}
+		
+		public Scene Run() {
+		
+	//Start indstillinger
 	    mainScene = new Scene(root);
 		Canvas canvas = new Canvas(gameWidth, gameHeight);
 		GraphicsContext context = canvas.getGraphicsContext2D();
 		ViewManager.gameStage.setTitle("Simp Gorillas");
-		root.setCenter(canvas);
+		root.getChildren().add(canvas);
 		
-		//root.getChildren().add(image1);
-		//root.getChildren().add(image2);
-		createBackground();
 		context.drawImage(image2,0,0, gameWidth, gameHeight);
 		//elementer der skal indsættes
 		//baggrund
-		//createBackground();
-		//context.setFill(Color.BLUE);
-		//context.fillRect(0, 0, gameWidth, gameHeight);
+		
 
 		//monkey 1
+		Building BM1 = buildings[1];
 		Sprite monkey1 = new Sprite();
-		monkey1.position.set(8, gameHeight - 60);
-		monkey1.setImage("monkey_throw.png");
+		monkey1.setImage(ViewManager.getMonkeyColor1());
+		monkey1.position.set(
+		BM1.offset + BM1.width / 2 - monkey1.getWidth() / 2, 
+		gameHeight - BM1.height - monkey1.getHeight());
 				
+					
 		//monkey 2
+		Building BM2 = buildings[AMOUNT_OF_BUILDINGS - 2];
 		Sprite monkey2 = new Sprite();
-		monkey2.position.set(gameWidth - 90, gameHeight - 60);
-		monkey2.setImage("monkey_throw2.png");
+		monkey2.setImage(ViewManager.getMonkeyColor2());
+		monkey2.position.set(
+		BM2.offset + BM2.width / 2 - monkey2.getWidth() / 2, 
+		gameHeight - BM2.height - monkey2.getHeight());
 		
 		//banekurve dot
 		Sprite dot = new Sprite();
-		dot.position.set(8, gameHeight-80);
+		dot.position.set(8, gameHeight);
 		dot.setImage("dot.png");
 		
 		//spiller tur trekanter
@@ -113,19 +168,32 @@ public class Game {
 		});
 		
         //vind og tab spillet vindue
-		Button next = new Button("Nyt spil");
-		Button logout = new Button("Luk spillet");
+		Button next = new Button("NEW GAME");
+		Button logout = new Button("BACK");
     	VBox in = new VBox();
     	in.setSpacing(7);
         in.setPadding(new Insets(30, 40, 40, 30));
-        in.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
         in.getChildren().addAll(next,logout);
+        
+     // tegner healthbar
+		
+    
+        healthbar = new ImageView("healthbar_full.png");
+		healthbar.setLayoutX(monkey1.position.x + 5);
+		healthbar.setLayoutY(monkey1.position.y-30);
+		root.getChildren().add(healthbar);
+		
+		healthbar2 = new ImageView("healthbar_full.png");
+		healthbar2.setLayoutX(monkey2.position.x);
+		healthbar2.setLayoutY(monkey2.position.y - 30);
+		root.getChildren().add(healthbar2);
         
         //button event
         Button button = new Button("Throw");
         //button.setPadding(4,4,4,4);
         button.setOnAction(e -> {
- 
+       
+    		
             if(util.isInt(angle.getText())) {
                 angleVal = Integer.parseInt(angle.getText());
             }
@@ -135,7 +203,15 @@ public class Game {
                     
             //clear baggrund
             context.drawImage(image2,0,0, gameWidth, gameHeight);
-    		
+            if (Utility.getRandomInt(0,8) == 0){
+        	    bonus = new BonusModifier(gameWidth, gameHeight);
+        	    modifierExist = true;
+        	   
+           }
+   			if (modifierExist ) {
+   				bonus.render(context);
+   				
+   			}
     		//runder
     		//runder
 			context.setFill(Color.YELLOW);
@@ -154,19 +230,54 @@ public class Game {
 				context.fillText("Runde: " + rounds, gameWidth/2 - 70, 35);
 				rounds++;			    					
 			}
+			//tegner bygninger
+			bmp.render(context);
 			
 			//tegner aber
             monkey1.render(context);
 			monkey2.render(context);
 			
+			
+			
 			//point tæller
 			 if (rounds%2 == 0) {
 	              graph.setup(angleVal, velocityVal, monkey1.position.x + 5, monkey1.position.y +5, root);
-	               graph.draw(dot, monkey1, monkey2, rounds);
+	               graph.draw(dot, monkey1, monkey2, rounds, bmp);
 			 	}else {
 	               graph.setup(180 - angleVal, velocityVal, monkey2.position.x + monkey2.boundary.width - 5, monkey2.position.y + 5, root );
-	               graph.draw(dot, monkey1, monkey2, rounds);
+	               graph.draw(dot, monkey1, monkey2, rounds,bmp);
 	           }
+			 
+			 	if (counter2 == 1) {
+			 		root.getChildren().remove(healthbar);
+			 		healthbar = new ImageView("healthbar_60.png");
+					healthbar.setLayoutX(monkey1.position.x + 5);
+					healthbar.setLayoutY(monkey1.position.y-30);
+					root.getChildren().add(healthbar);
+				}
+				if (counter2 == 2) {
+					root.getChildren().remove(healthbar);
+					healthbar = new ImageView("healthbar_30.png");
+					healthbar.setLayoutX(monkey1.position.x + 5);
+					healthbar.setLayoutY(monkey1.position.y-30);
+					root.getChildren().add(healthbar);
+				}
+				
+				if (counter1 == 1) {
+					root.getChildren().remove(healthbar2);
+					healthbar2 = new ImageView("healthbar_60.png");
+					healthbar2.setLayoutX(monkey2.position.x);
+					healthbar2.setLayoutY(monkey2.position.y - 30);
+					root.getChildren().add(healthbar2);
+				}
+				if (counter1 == 2) {
+					root.getChildren().remove(healthbar2);
+					healthbar2 = new ImageView("healthbar_30.png");
+					healthbar2.setLayoutX(monkey2.position.x);
+					healthbar2.setLayoutY(monkey2.position.y - 30);
+					root.getChildren().add(healthbar2);
+				}
+		
 			
 			if(pointsM1 == 3) {
 				removeTriangle(m2Triangle);
@@ -174,7 +285,11 @@ public class Game {
 	    		context.setFill(Color.YELLOW);
 	    		context.setFont(new Font("Arial", 20));
 		    	context.fillText("Tillykke abe 1, du har vundet spillet!", gameWidth/2 - 150, 35);
-		        root.setTop(in);
+		    	root.getChildren().remove(get_numbers);
+		    	
+		    	root.getChildren().remove(healthbar2);
+		    	root.getChildren().remove(healthbar);
+		    	root.getChildren().add(in);
 		    	
 		        next.setOnAction(f -> {
 		        	pointsM1 = 0;
@@ -194,12 +309,16 @@ public class Game {
 	    		context.setFill(Color.YELLOW);
 	    		context.setFont(new Font("Arial", 20));
 		    	context.fillText("Tillykke abe 2, du har vundet spillet!", gameWidth/2 - 150, 35);
-		    
-		    	root.setTop(in);
+		    	root.getChildren().remove(get_numbers);
+		    	root.getChildren().remove(healthbar);
+		    	root.getChildren().remove(healthbar2);
+		    	root.getChildren().add(in);
+		   
 		    	
 		        next.setOnAction(f -> {
 		        	pointsM1 = 0;
 		        	pointsM2 = 0;
+		        	ViewManager.gameStage.close();
 		        	game.start(primaryStage);
 		        });
 		    					        
@@ -219,12 +338,11 @@ public class Game {
         
         //tegner 
         //vinkel og fart box
-        VBox get_numbers = new VBox();
+        get_numbers = new VBox();
         get_numbers.setSpacing(7);
         get_numbers.setPadding(new Insets(20, 20, 20, 20));
-        get_numbers.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
         get_numbers.getChildren().addAll(angle, speed, button,back);
-        root.setTop(get_numbers);
+        root.getChildren().add(get_numbers);
         
         //tegner pointscore
 		context.setFill(Color.YELLOW);
@@ -235,8 +353,12 @@ public class Game {
 		//tegner aber
         monkey1.render(context);
 		monkey2.render(context);
-
 		
+		
+		
+
+		//tegner bygninger
+		bmp.render(context);
 		return mainScene;
 		
 	}
@@ -244,7 +366,7 @@ public class Game {
 	public Polygon drawTriangle(Sprite object) {
 		Polygon polygonTri = new Polygon();
 		polygonTri.setFill(Color.YELLOW);
-		double trueY = object.position.y + graph.buttonHeights;
+		double trueY = object.position.y - 25;
 		
 		if (object.getName() == "monkey_throw.png") {
 			polygonTri.getPoints().addAll(new Double[]{
@@ -262,53 +384,6 @@ public class Game {
 		return polygonTri;
 	}
 	
-	/*public void animateBackground() {
-		Canvas canvas2 = new Canvas(gameWidth, gameHeight);
-		GraphicsContext context2 = canvas2.getGraphicsContext2D();
-		root.setCenter(canvas2);
-		Timeline t = new Timeline();
-		
-		t.setCycleCount(Timeline.INDEFINITE);
-
-		t.getKeyFrames().add(new KeyFrame(
-				Duration.millis(300),
-				(ActionEvent event) -> {
-					context2.drawImage(image1,0,0, gameWidth, gameHeight);
-				}));
-		
-		t.getKeyFrames().add(new KeyFrame(
-				Duration.millis(600),
-				(ActionEvent event) -> {
-					context2.drawImage(image2,0,0, gameWidth, gameHeight);
-					
-				}));
-		t.getKeyFrames().add(new KeyFrame(
-				Duration.millis(900),
-				(ActionEvent event) -> {
-					context2.drawImage(image3,0,0, gameWidth, gameHeight);
-					
-				}));
-		
-		t.play();
-	
-	}*/
-	
-	private void createBackground() {
-		gridPane1 = new GridPane();
-		gridPane2 = new GridPane();
-		
-		for (int i = 0 ; i < 12; i++) {
-			ImageView backgroundImage1 = new ImageView(BACKGROUND);
-			ImageView backgroundImage2 = new ImageView(BACKGROUND);
-			GridPane.setConstraints(backgroundImage1, i% 3, i / 3 );
-			GridPane.setConstraints(backgroundImage2, i% 3, i / 3 );
-			gridPane1.getChildren().add(backgroundImage1);
-			gridPane2.getChildren().add(backgroundImage2);
-		}
-		
-		gridPane2.setLayoutY(- 1024);
-		root.getChildren().addAll(gridPane1, gridPane2);
-	}
 	
 	public void removeTriangle(Polygon triangle) {
 		root.getChildren().remove(triangle);
@@ -316,11 +391,15 @@ public class Game {
 
 	public static void inc_m1() {
 		pointsM1++;
+		
+		counter1++;
     }
   
     public static void inc_m2() {
     	pointsM2++;
-   
+    	
+    	counter2++;
 }
-
+    
+    
 }

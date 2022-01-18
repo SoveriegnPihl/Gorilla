@@ -1,4 +1,5 @@
 import javafx.animation.PathTransition;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
@@ -22,6 +23,7 @@ public class simulation {
 	private final double GRAVITY = 9.81;
 	int buttonHeights = 189;
 	Sprite Banana;
+	boolean modifier = false;
 	
 	
 	public void setup(int angle, int speed, double x, double y, BorderPane root){
@@ -38,10 +40,11 @@ public class simulation {
 		
 	}
 
-	public void draw(Sprite thrownBanana, Sprite m1, Sprite m2, int round){
+	public void draw(Sprite thrownBanana, Sprite m1, Sprite m2, int round, GraphicsContext context){
 		double Toppunktx = 0;
 		double Toppunkty = 6000;
 		Banana = thrownBanana;
+		modifier = false;
 		
 		for(int i = 0; i < 10000; i++){
 			time += 0.01;
@@ -52,31 +55,42 @@ public class simulation {
 				Toppunkty = thrownBanana.position.y;
 				Toppunktx = thrownBanana.position.x;
 			}
-			
+			if(BonusModifier.exists()) {
+				
+				if(thrownBanana.overlaps(BonusModifier.doublePoints)) {
+				modifier = true;
+				System.out.println("hits MF");
+			}
+				
+			}
 			if(round%2 == 0) {
+				
 				if (thrownBanana.overlaps(m2)) {
+					if (modifier) {
+						Game.inc_m1();
+					}
 					Game.inc_m1();
 					break; }
 			}
+			System.out.println(modifier);
+		
 			if(round%2 != 0){ 
-				if (thrownBanana.overlaps(m1)) {	
+
+				if (thrownBanana.overlaps(m1)) {
+					if (modifier) {
+						Game.inc_m2();
+					}
 					Game.inc_m2();
 					break; }
 			}
+		
 			
 			if(thrownBanana.position.x > ViewManager.gameWidth || thrownBanana.position.y > ViewManager.gameHeight || thrownBanana.position.x < 0) {
 				break;
-			}
-			int radius = 50;
 			
-			if((Game.getXcoordinate() - radius) < thrownBanana.position.x &&
-				thrownBanana.position.x < (Game.getXcoordinate() + radius) &&
-				(Game.getYcoordinate() - radius) < thrownBanana.position.y &&
-				thrownBanana.position.y < (Game.getYcoordinate() + radius)){
-				//Game.inc_m1();
-				System.out.println("hit");
-				//break;
+			
 			}
+			thrownBanana.render(context);
 		}
 		
 

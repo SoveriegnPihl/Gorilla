@@ -37,8 +37,8 @@ public class ViewManager {
 	static Stage gameStage = new Stage();
 	private final String FONT_PATH = "kenvector_future.ttf";
 	
-	static int gameWidth = 1000;
-	static int gameHeight = 800;
+	static int gameWidth = 800;
+	static int gameHeight = 600;
 	static int pointsM1, pointsM2;
 	static int[] dimensions = new int[2];
 	Stage stage;
@@ -417,6 +417,7 @@ private void logout(Stage mainStage)  {
 			monkey2Color = color1.getValue().toString();
 			return "monkey_throw_"+monkey2Color.toLowerCase()+"2.png";
 		}
+
 
 	  
 	}

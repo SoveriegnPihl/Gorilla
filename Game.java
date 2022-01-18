@@ -31,26 +31,21 @@ public class Game {
 	int rounds = 1;
 	Scene mainScene;
 	
-	final static ImageView image1 = new ImageView("backny.gif");
 	final static Image image2 = new Image ("mainbackground.png");
-	final static Image image3 = new Image ("3.png");
 	
 	int gameWidth;
 	int gameHeight;
+	boolean modifierExist = false;
 	
-	private GridPane gridPane1;
-	private GridPane gridPane2;
-	
-	private final static String BACKGROUND = "backny.gif";
-
 	simulation graph = new simulation();
 	Utility util = new Utility();
 	Main game = new Main();
 	Stage primaryStage;
 	BorderPane root = new BorderPane();
 	BorderPane root1 = new BorderPane();
-	Utility Number;
-	private Utility NewNumber;
+	GraphicsContext context;
+	BonusModifier bonus;
+	static Sprite doublePoints;
 	private static int xCoordinate;
 	private static int yCoordinate;
 		
@@ -62,20 +57,11 @@ public class Game {
 		//Start indstillinger
 	    mainScene = new Scene(root);
 		Canvas canvas = new Canvas(gameWidth, gameHeight);
-		GraphicsContext context = canvas.getGraphicsContext2D();
+		context = canvas.getGraphicsContext2D();
 		ViewManager.gameStage.setTitle("Simp Gorillas");
 		root.setCenter(canvas);
 		
-		//root.getChildren().add(image1);
-		//root.getChildren().add(image2);
-		createBackground();
 		context.drawImage(image2,0,0, gameWidth, gameHeight);
-		//elementer der skal indsættes
-		//baggrund
-		//createBackground();
-		//context.setFill(Color.BLUE);
-		//context.fillRect(0, 0, gameWidth, gameHeight);
-		
 	
 
 		//monkey 1
@@ -132,20 +118,26 @@ public class Game {
         Button button = new Button("Throw");
         //button.setPadding(4,4,4,4);
         button.setOnAction(e -> {
-        	System.out.println(NewNumber.getRandomInt(0, 8));
-    		
-    		if(NewNumber.getRandomInt(0, 8) == 1) {
-    			bonusModifier();
-    			}
-            if(util.isInt(angle.getText())) {
+        	
+            if(Utility.isInt(angle.getText())) {
                 angleVal = Integer.parseInt(angle.getText());
             }
-            if(util.isInt(speed.getText())) {
+            if(Utility.isInt(speed.getText())) {
                 velocityVal = Integer.parseInt(speed.getText());
             }
                     
             //clear baggrund
-            context.drawImage(image2,0,0, gameWidth, gameHeight);
+           context.drawImage(image2,0,0, gameWidth, gameHeight);
+           if (Utility.getRandomInt(0,8) == 0){
+        	    bonus = new BonusModifier(gameWidth, gameHeight);
+        	    modifierExist = true;
+        	   
+           }
+   			if (modifierExist ) {
+   				bonus.render(context);
+   				
+   			}
+        
     		
     		//runder
     		//runder
@@ -170,18 +162,18 @@ public class Game {
             monkey1.render(context);
 			monkey2.render(context);
 			
-			//point tæller
+			//point tï¿½ller
 			 if (rounds%2 == 0) {
 	              graph.setup(angleVal, velocityVal, monkey1.position.x + 5, monkey1.position.y +5, root);
-	               graph.draw(dot, monkey1, monkey2, rounds);
+	               graph.draw(dot, monkey1, monkey2, rounds,context);
 			 	}else {
 	               graph.setup(180 - angleVal, velocityVal, monkey2.position.x + monkey2.boundary.width - 5, monkey2.position.y + 5, root );
-	               graph.draw(dot, monkey1, monkey2, rounds);
+	               graph.draw(dot, monkey1, monkey2, rounds,context);
 	           }
 			
-			if(pointsM1 == 3) {
+			if(pointsM1 >= 3) {
 				removeTriangle(m2Triangle);
-				context.drawImage(image2,0,0, gameWidth, gameHeight);
+				//image2,0,0, gameWidth, gameHeight);
 	    		context.setFill(Color.YELLOW);
 	    		context.setFont(new Font("Arial", 20));
 		    	context.fillText("Tillykke abe 1, du har vundet spillet!", gameWidth/2 - 150, 35);
@@ -199,9 +191,9 @@ public class Game {
 		        });
 		    					    
 			}
-			if(pointsM2 == 3) {
+			if(pointsM2 >= 3) {
 				removeTriangle(m1Triangle);
-				context.drawImage(image2,0,0, gameWidth, gameHeight);
+				context.drawImage(image2 ,0,0, gameWidth, gameHeight);
 	    		context.setFill(Color.YELLOW);
 	    		context.setFont(new Font("Arial", 20));
 		    	context.fillText("Tillykke abe 2, du har vundet spillet!", gameWidth/2 - 150, 35);
@@ -247,9 +239,6 @@ public class Game {
         monkey1.render(context);
 		monkey2.render(context);
 		
-		NewNumber = new Utility();
-		
-		
 
 		
 		return mainScene;
@@ -277,54 +266,7 @@ public class Game {
 		return polygonTri;
 	}
 	
-	/*public void animateBackground() {
-		Canvas canvas2 = new Canvas(gameWidth, gameHeight);
-		GraphicsContext context2 = canvas2.getGraphicsContext2D();
-		root.setCenter(canvas2);
-		Timeline t = new Timeline();
-		
-		t.setCycleCount(Timeline.INDEFINITE);
 
-		t.getKeyFrames().add(new KeyFrame(
-				Duration.millis(300),
-				(ActionEvent event) -> {
-					context2.drawImage(image1,0,0, gameWidth, gameHeight);
-				}));
-		
-		t.getKeyFrames().add(new KeyFrame(
-				Duration.millis(600),
-				(ActionEvent event) -> {
-					context2.drawImage(image2,0,0, gameWidth, gameHeight);
-					
-				}));
-		t.getKeyFrames().add(new KeyFrame(
-				Duration.millis(900),
-				(ActionEvent event) -> {
-					context2.drawImage(image3,0,0, gameWidth, gameHeight);
-					
-				}));
-		
-		t.play();
-	
-	}*/
-	
-	private void createBackground() {
-		gridPane1 = new GridPane();
-		gridPane2 = new GridPane();
-		
-		for (int i = 0 ; i < 12; i++) {
-			ImageView backgroundImage1 = new ImageView(BACKGROUND);
-			ImageView backgroundImage2 = new ImageView(BACKGROUND);
-			GridPane.setConstraints(backgroundImage1, i% 3, i / 3 );
-			GridPane.setConstraints(backgroundImage2, i% 3, i / 3 );
-			gridPane1.getChildren().add(backgroundImage1);
-			gridPane2.getChildren().add(backgroundImage2);
-		}
-		
-		gridPane2.setLayoutY(- 1024);
-		root.getChildren().addAll(gridPane1, gridPane2);
-	}
-	
 	public void removeTriangle(Polygon triangle) {
 		root.getChildren().remove(triangle);
 	}
@@ -337,26 +279,6 @@ public class Game {
     	pointsM2++;
    
 }
-    public void bonusModifier() {
-    	
-    	Number = new Utility();
-    	Number.getRandomInt(0,200);
-    	xCoordinate = Number.getRandomInt(80,gameWidth-150);
-    	yCoordinate = Number.getRandomInt(50,500);
-    	Circle circle = new Circle(xCoordinate, yCoordinate, 50, Color.RED);
     
-        root.getChildren().addAll(circle);
     }
-
-	public static int getXcoordinate() {
-		
-		return xCoordinate;
-	}
-
-	public static int getYcoordinate() {
-		// TODO Auto-generated method stub
-		return yCoordinate;
-	}
-    
-    
-}
+ 

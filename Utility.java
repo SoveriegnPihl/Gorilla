@@ -6,12 +6,12 @@ public class Utility {
 		
 	}
 	
-	public int getRandomInt(int min, int max) {
+	public static int getRandomInt(int min, int max) {
 		
 		return ThreadLocalRandom.current().nextInt(min, max + 1);
 	}
 	
-	public boolean isInt(String message) {
+	public static boolean isInt(String message) {
         try {
             int intForTest = Integer.parseInt(message);
             return true;

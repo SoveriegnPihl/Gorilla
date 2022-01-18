@@ -39,8 +39,8 @@ public class Building {
 
 			}
 		}
-		int windowWidth = 31;
-		int windowHeight = 41;
+		int windowWidth = 30;
+		int windowHeight = 40;
 		
 		int marginWidth = windowWidth;
 		int marginHeight = windowHeight;

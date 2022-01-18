@@ -45,4 +45,24 @@ public class Sprite {
 		return imgName;
 	}
 
+	public double getWidth() {
+		
+		return boundary.width;
+	}
+
+	public double getXPos() {
+		// TODO Auto-generated method stub
+		return position.x;
+	}
+
+	public double getYPos() {
+		// TODO Auto-generated method stub
+		return position.y;
+	}
+
+	public double getHeight() {
+		// TODO Auto-generated method stub
+		return boundary.height;
+	}
+
 }

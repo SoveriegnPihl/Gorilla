@@ -57,7 +57,7 @@ public class ViewManager {
 	List<GorillaButton> menuButtons;
 	
 	public Utility util = new Utility();
-	public Game spillet = new Game();
+	public Game spillet;
 	
 	int y = 245;
 	int lblY = 250;
@@ -229,8 +229,9 @@ public class ViewManager {
 	    						System.out.println("the fuck " + gameWidth + " - " + gameHeight);
 	    			 
 	    			if (hej) {*/
+	    			spillet = new Game(gameWidth,gameHeight);
 	    			settingStage.close();
-	 				gameStage.setScene(spillet.spil(gameWidth,gameHeight));
+	 				gameStage.setScene(spillet.Run());
 	 				gameStage.show();
 	 				
 	    					
@@ -347,7 +348,7 @@ private void logout(Stage mainStage)  {
 	private void createTextFields() {
 	
 		numberOfRounds = new TextField();
-		addTextfields(numberOfRounds,350,440,50,450,"Number of rounds");
+		addTextfields(numberOfRounds,350,440,50,450,"Points to win");
 		
 		width = new TextField();
 		addTextfields(width,350,240,50,250, "Please select width");

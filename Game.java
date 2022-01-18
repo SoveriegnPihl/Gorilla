@@ -12,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.image.PixelReader;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
@@ -33,14 +34,13 @@ public class Game {
 	Scene mainScene;
 	
 	final static Image image2 = new Image ("mainbackground.png");
-	final static Image image3 = new Image ("3.png");
 	
 	int gameWidth;
 	int gameHeight;
 	
-	private GridPane gridPane1;
-	private GridPane gridPane2;
-	
+	Sprite monkey_win = new Sprite();
+	Sprite monkey1 = new Sprite();
+	Sprite monkey2 = new Sprite();
 
 	simulation graph = new simulation();
 	Utility util = new Utility();
@@ -49,27 +49,86 @@ public class Game {
 	AnchorPane root = new AnchorPane();
 	BorderPane root1 = new BorderPane();
 	Utility Number;
-	private Utility NewNumber;
 	private VBox get_numbers;
 	private static ImageView healthbar;
 	private ImageView healthbar2;
 	private boolean modifierExist;
 	private BonusModifier bonus;
-	private static int xCoordinate;
-	private static int yCoordinate;
+	private GridPane gridPane1;
+	private GridPane gridPane2;
+	
+	Image BACKGROUND_IMAGE = new Image("deep_blue.png");
+	
 	private static int counter1 = 0;
 	private static int counter2 = 0;
+	
+	BMP bmp;
+	Building[] buildings;
+	animationThread animation;
+	sleepThread sleep;
+	double[] windConditions = new double[5];
+	GraphicsContext context;
+	
+	public final static int AMOUNT_OF_BUILDINGS = 10;
 		
-	public Scene spil (int gameWidth, int gameHeight) {
+	public Game (int gameWidth, int gameHeight) {
 		
 		this.gameWidth = gameWidth;
 		this.gameHeight = gameHeight;
+		bmp = new BMP(gameWidth, gameHeight);
+		
+		Image image = new Image("Windows.png");
+		PixelReader reader = image.getPixelReader();
+		
+		
+		buildings = new Building[AMOUNT_OF_BUILDINGS];
+		int offset = 0;
+		
+		double defaultWidth = gameWidth / AMOUNT_OF_BUILDINGS;
+		double[] buildingsWidth = new double[AMOUNT_OF_BUILDINGS];
+		for(int i = 0; i < AMOUNT_OF_BUILDINGS; i++) {
+			buildingsWidth[i] = defaultWidth;
+		}
+	
+		for(int i = 0; i < AMOUNT_OF_BUILDINGS; i++) {
+			
+			int widthChange = Utility.getRandomInt(0, gameWidth / 25);
+			buildingsWidth[i] += widthChange;
+			double perBuildingChange = ((double)widthChange) / ((double)AMOUNT_OF_BUILDINGS - 1);
+			for(int j = 0; j < AMOUNT_OF_BUILDINGS; j++) {
+				if(i != j) {
+					buildingsWidth[j] -= perBuildingChange; 
+				}
+			}
+		}
+		
+		for(int i = 0; i < AMOUNT_OF_BUILDINGS - 1 ;i++) {
+			int height = Utility.getRandomInt(gameHeight/5, (int)(gameHeight / 2));
+			int width = (int)buildingsWidth[i];
+			buildings[i] = new Building(width, height, offset, gameHeight, bmp, reader);
+			offset += width;
+		}
+		
+		int height = Utility.getRandomInt(gameHeight/5, (int)(gameHeight / 1.3));
+		buildings[AMOUNT_OF_BUILDINGS - 1] = new Building(gameWidth - offset, height, offset, gameHeight, bmp, reader);
+		
+
+		
+		
+	}
+		
+		public Scene Run() {
+		
 	//Start indstillinger
 	    mainScene = new Scene(root);
 		Canvas canvas = new Canvas(gameWidth, gameHeight);
-		GraphicsContext context = canvas.getGraphicsContext2D();
+		context = canvas.getGraphicsContext2D();
 		ViewManager.gameStage.setTitle("Simp Gorillas");
+		addwindConditions();
 		root.getChildren().add(canvas);
+		createBackground();
+		//animation = new animationThread(gridPane1, gridPane2);
+		//animation.start();
 		
 		context.drawImage(image2,0,0, gameWidth, gameHeight);
 		//elementer der skal indsættes
@@ -77,14 +136,24 @@ public class Game {
 		
 
 		//monkey 1
-		Sprite monkey1 = new Sprite();
-		monkey1.position.set(8, gameHeight - 60);
+		Building BM1 = buildings[1];
+		monkey1 = new Sprite();
 		monkey1.setImage(ViewManager.getMonkeyColor1());
-		System.out.print(ViewManager.getMonkeyColor1());
+		monkey1.position.set(
+		BM1.offset + BM1.width / 2 - monkey1.getWidth() / 2, 
+		gameHeight - BM1.height - monkey1.getHeight());
+				
+					
 		//monkey 2
-		Sprite monkey2 = new Sprite();
-		monkey2.position.set(gameWidth - 90, gameHeight - 60);
+		Building BM2 = buildings[AMOUNT_OF_BUILDINGS - 2];
+		monkey2 = new Sprite();
 		monkey2.setImage(ViewManager.getMonkeyColor2());
+		monkey2.position.set(
+		BM2.offset + BM2.width / 2 - monkey2.getWidth() / 2, 
+		gameHeight - BM2.height - monkey2.getHeight());
+		
+		// monkey win
+		monkey_win.setImage("monkey_win.png");
 		
 		//banekurve dot
 		Sprite dot = new Sprite();
@@ -150,6 +219,11 @@ public class Game {
             if(util.isInt(speed.getText())) {
                 velocityVal = Integer.parseInt(speed.getText());
             }
+            
+          //wind
+            int windSel = Utility.getRandomInt(0,4);
+            animation.setWind(windConditions[windSel]); 
+            graph.setWind(windConditions[windSel]);
                     
             //clear baggrund
             context.drawImage(image2,0,0, gameWidth, gameHeight);
@@ -180,6 +254,8 @@ public class Game {
 				context.fillText("Runde: " + rounds, gameWidth/2 - 70, 35);
 				rounds++;			    					
 			}
+			//tegner bygninger
+			bmp.render(context);
 			
 			//tegner aber
             monkey1.render(context);
@@ -190,10 +266,13 @@ public class Game {
 			//point tæller
 			 if (rounds%2 == 0) {
 	              graph.setup(angleVal, velocityVal, monkey1.position.x + 5, monkey1.position.y +5, root);
-	               graph.draw(dot, monkey1, monkey2, rounds);
-			 	}else {
+	               graph.draw(dot, monkey1, monkey2, rounds, bmp,context);
+	         
+			 
+			 }else {
 	               graph.setup(180 - angleVal, velocityVal, monkey2.position.x + monkey2.boundary.width - 5, monkey2.position.y + 5, root );
-	               graph.draw(dot, monkey1, monkey2, rounds);
+	               graph.draw(dot, monkey1, monkey2, rounds,bmp,context);
+	             
 	           }
 			 
 			 	if (counter2 == 1) {
@@ -225,7 +304,7 @@ public class Game {
 					healthbar2.setLayoutY(monkey2.position.y - 30);
 					root.getChildren().add(healthbar2);
 				}
-		
+				
 			
 			if(pointsM1 == 3) {
 				removeTriangle(m2Triangle);
@@ -266,6 +345,7 @@ public class Game {
 		        next.setOnAction(f -> {
 		        	pointsM1 = 0;
 		        	pointsM2 = 0;
+		        	ViewManager.gameStage.close();
 		        	game.start(primaryStage);
 		        });
 		    					        
@@ -300,12 +380,9 @@ public class Game {
 		//tegner aber
         monkey1.render(context);
 		monkey2.render(context);
-		
-		NewNumber = new Utility();
-		
-		
 
-		
+		//tegner bygninger
+		bmp.render(context);
 		return mainScene;
 		
 	}
@@ -347,6 +424,43 @@ public class Game {
     	
     	counter2++;
 }
+    private void createBackground() {
+		gridPane1 = new GridPane();
+		gridPane2 = new GridPane();
+		
+		for (int row = 0 ; row < 3; row++) {
+			for(int colum = 0; colum < 4; colum++) {
+			ImageView backgroundImage1 = new ImageView(BACKGROUND_IMAGE);
+			ImageView backgroundImage2 = new ImageView(BACKGROUND_IMAGE);
+			
+			GridPane.setConstraints(backgroundImage1, colum, row );
+			GridPane.setConstraints(backgroundImage2, colum, row );
+			gridPane1.getChildren().add(backgroundImage1);
+			gridPane2.getChildren().add(backgroundImage2);
+			}
+		}
+		
+		gridPane2.setLayoutY(-256);		
+		//root.getChildren().addAll(gridPane1, gridPane2);
+	}
+    public void addwindConditions() {
+		windConditions[0] = -0.1;
+		windConditions[1] = -0.07;
+		windConditions[2] = 0;
+		windConditions[3] = 0.07;
+		windConditions[4] = 0.1;
+		
+	}
+    public void monkeyWin (Sprite monkey) {
+		if(monkey.getName() == "monkey_throw.png") {
+			monkey_win.setPosition(monkey1.position.x + 17, monkey1.position.y - 1);
+			monkey_win.render(context);
+		}
+		else {
+			monkey_win.setPosition(monkey2.position.x - 1, monkey2.position.y - 1);
+			monkey_win.render(context);
+		}
+	}
     
     
 }

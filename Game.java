@@ -12,6 +12,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.BorderPane;
@@ -32,37 +33,48 @@ public class Game {
 	Scene mainScene;
 	
 	final static Image image2 = new Image ("mainbackground.png");
+	final static Image image3 = new Image ("3.png");
 	
 	int gameWidth;
 	int gameHeight;
-	boolean modifierExist = false;
 	
+	private GridPane gridPane1;
+	private GridPane gridPane2;
+	
+
 	simulation graph = new simulation();
 	Utility util = new Utility();
 	Main game = new Main();
 	Stage primaryStage;
-	BorderPane root = new BorderPane();
+	AnchorPane root = new AnchorPane();
 	BorderPane root1 = new BorderPane();
-	GraphicsContext context;
-	BonusModifier bonus;
-	static Sprite doublePoints;
+	Utility Number;
+	private Utility NewNumber;
+	private VBox get_numbers;
+	private static ImageView healthbar;
+	private ImageView healthbar2;
+	private boolean modifierExist;
+	private BonusModifier bonus;
 	private static int xCoordinate;
 	private static int yCoordinate;
+	private static int counter1 = 0;
+	private static int counter2 = 0;
 		
 	public Scene spil (int gameWidth, int gameHeight) {
 		
 		this.gameWidth = gameWidth;
 		this.gameHeight = gameHeight;
-	
-		//Start indstillinger
+	//Start indstillinger
 	    mainScene = new Scene(root);
 		Canvas canvas = new Canvas(gameWidth, gameHeight);
-		context = canvas.getGraphicsContext2D();
+		GraphicsContext context = canvas.getGraphicsContext2D();
 		ViewManager.gameStage.setTitle("Simp Gorillas");
-		root.setCenter(canvas);
+		root.getChildren().add(canvas);
 		
 		context.drawImage(image2,0,0, gameWidth, gameHeight);
-	
+		//elementer der skal indsættes
+		//baggrund
+		
 
 		//monkey 1
 		Sprite monkey1 = new Sprite();
@@ -76,7 +88,7 @@ public class Game {
 		
 		//banekurve dot
 		Sprite dot = new Sprite();
-		dot.position.set(8, gameHeight-80);
+		dot.position.set(8, gameHeight);
 		dot.setImage("dot.png");
 		
 		//spiller tur trekanter
@@ -106,29 +118,42 @@ public class Game {
 		});
 		
         //vind og tab spillet vindue
-		Button next = new Button("Nyt spil");
-		Button logout = new Button("Luk spillet");
+		Button next = new Button("NEW GAME");
+		Button logout = new Button("BACK");
     	VBox in = new VBox();
     	in.setSpacing(7);
         in.setPadding(new Insets(30, 40, 40, 30));
-        in.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
         in.getChildren().addAll(next,logout);
+        
+     // tegner healthbar
+		
+    
+        healthbar = new ImageView("healthbar_full.png");
+		healthbar.setLayoutX(monkey1.position.x + 5);
+		healthbar.setLayoutY(monkey1.position.y-30);
+		root.getChildren().add(healthbar);
+		
+		healthbar2 = new ImageView("healthbar_full.png");
+		healthbar2.setLayoutX(monkey2.position.x);
+		healthbar2.setLayoutY(monkey2.position.y - 30);
+		root.getChildren().add(healthbar2);
         
         //button event
         Button button = new Button("Throw");
         //button.setPadding(4,4,4,4);
         button.setOnAction(e -> {
-        	
-            if(Utility.isInt(angle.getText())) {
+       
+    		
+            if(util.isInt(angle.getText())) {
                 angleVal = Integer.parseInt(angle.getText());
             }
-            if(Utility.isInt(speed.getText())) {
+            if(util.isInt(speed.getText())) {
                 velocityVal = Integer.parseInt(speed.getText());
             }
                     
             //clear baggrund
-           context.drawImage(image2,0,0, gameWidth, gameHeight);
-           if (Utility.getRandomInt(0,8) == 0){
+            context.drawImage(image2,0,0, gameWidth, gameHeight);
+            if (Utility.getRandomInt(0,8) == 0){
         	    bonus = new BonusModifier(gameWidth, gameHeight);
         	    modifierExist = true;
         	   
@@ -137,8 +162,6 @@ public class Game {
    				bonus.render(context);
    				
    			}
-        
-    		
     		//runder
     		//runder
 			context.setFill(Color.YELLOW);
@@ -162,22 +185,59 @@ public class Game {
             monkey1.render(context);
 			monkey2.render(context);
 			
-			//point tï¿½ller
+			
+			
+			//point tæller
 			 if (rounds%2 == 0) {
 	              graph.setup(angleVal, velocityVal, monkey1.position.x + 5, monkey1.position.y +5, root);
-	               graph.draw(dot, monkey1, monkey2, rounds,context);
+	               graph.draw(dot, monkey1, monkey2, rounds);
 			 	}else {
 	               graph.setup(180 - angleVal, velocityVal, monkey2.position.x + monkey2.boundary.width - 5, monkey2.position.y + 5, root );
-	               graph.draw(dot, monkey1, monkey2, rounds,context);
+	               graph.draw(dot, monkey1, monkey2, rounds);
 	           }
+			 
+			 	if (counter2 == 1) {
+			 		root.getChildren().remove(healthbar);
+			 		healthbar = new ImageView("healthbar_60.png");
+					healthbar.setLayoutX(monkey1.position.x + 5);
+					healthbar.setLayoutY(monkey1.position.y-30);
+					root.getChildren().add(healthbar);
+				}
+				if (counter2 == 2) {
+					root.getChildren().remove(healthbar);
+					healthbar = new ImageView("healthbar_30.png");
+					healthbar.setLayoutX(monkey1.position.x + 5);
+					healthbar.setLayoutY(monkey1.position.y-30);
+					root.getChildren().add(healthbar);
+				}
+				
+				if (counter1 == 1) {
+					root.getChildren().remove(healthbar2);
+					healthbar2 = new ImageView("healthbar_60.png");
+					healthbar2.setLayoutX(monkey2.position.x);
+					healthbar2.setLayoutY(monkey2.position.y - 30);
+					root.getChildren().add(healthbar2);
+				}
+				if (counter1 == 2) {
+					root.getChildren().remove(healthbar2);
+					healthbar2 = new ImageView("healthbar_30.png");
+					healthbar2.setLayoutX(monkey2.position.x);
+					healthbar2.setLayoutY(monkey2.position.y - 30);
+					root.getChildren().add(healthbar2);
+				}
+		
 			
-			if(pointsM1 >= 3) {
+			if(pointsM1 == 3) {
 				removeTriangle(m2Triangle);
-				//image2,0,0, gameWidth, gameHeight);
+				context.drawImage(image2,0,0, gameWidth, gameHeight);
 	    		context.setFill(Color.YELLOW);
 	    		context.setFont(new Font("Arial", 20));
 		    	context.fillText("Tillykke abe 1, du har vundet spillet!", gameWidth/2 - 150, 35);
-		        root.setTop(in);
+		    	root.getChildren().remove(get_numbers);
+		    	
+		    	root.getChildren().remove(healthbar2);
+		    	root.getChildren().remove(healthbar);
+		    	root.getChildren().add(in);
 		    	
 		        next.setOnAction(f -> {
 		        	pointsM1 = 0;
@@ -191,14 +251,17 @@ public class Game {
 		        });
 		    					    
 			}
-			if(pointsM2 >= 3) {
+			if(pointsM2 == 3) {
 				removeTriangle(m1Triangle);
-				context.drawImage(image2 ,0,0, gameWidth, gameHeight);
+				context.drawImage(image2,0,0, gameWidth, gameHeight);
 	    		context.setFill(Color.YELLOW);
 	    		context.setFont(new Font("Arial", 20));
 		    	context.fillText("Tillykke abe 2, du har vundet spillet!", gameWidth/2 - 150, 35);
-		    
-		    	root.setTop(in);
+		    	root.getChildren().remove(get_numbers);
+		    	root.getChildren().remove(healthbar);
+		    	root.getChildren().remove(healthbar2);
+		    	root.getChildren().add(in);
+		   
 		    	
 		        next.setOnAction(f -> {
 		        	pointsM1 = 0;
@@ -222,12 +285,11 @@ public class Game {
         
         //tegner 
         //vinkel og fart box
-        VBox get_numbers = new VBox();
+        get_numbers = new VBox();
         get_numbers.setSpacing(7);
         get_numbers.setPadding(new Insets(20, 20, 20, 20));
-        get_numbers.setBackground(new Background(new BackgroundFill(Color.BLUE, CornerRadii.EMPTY, Insets.EMPTY)));
         get_numbers.getChildren().addAll(angle, speed, button,back);
-        root.setTop(get_numbers);
+        root.getChildren().add(get_numbers);
         
         //tegner pointscore
 		context.setFill(Color.YELLOW);
@@ -239,6 +301,9 @@ public class Game {
         monkey1.render(context);
 		monkey2.render(context);
 		
+		NewNumber = new Utility();
+		
+		
 
 		
 		return mainScene;
@@ -248,7 +313,7 @@ public class Game {
 	public Polygon drawTriangle(Sprite object) {
 		Polygon polygonTri = new Polygon();
 		polygonTri.setFill(Color.YELLOW);
-		double trueY = object.position.y + graph.buttonHeights;
+		double trueY = object.position.y - 25;
 		
 		if (object.getName() == "monkey_throw.png") {
 			polygonTri.getPoints().addAll(new Double[]{
@@ -266,19 +331,22 @@ public class Game {
 		return polygonTri;
 	}
 	
-
+	
 	public void removeTriangle(Polygon triangle) {
 		root.getChildren().remove(triangle);
 	}
 
 	public static void inc_m1() {
 		pointsM1++;
+		
+		counter1++;
     }
   
     public static void inc_m2() {
     	pointsM2++;
-   
+    	
+    	counter2++;
 }
     
-    }
- 
+    
+}

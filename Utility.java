@@ -11,7 +11,7 @@ public class Utility {
 		return ThreadLocalRandom.current().nextInt(min, max + 1);
 	}
 	
-	public static boolean isInt(String message) {
+	public boolean isInt(String message) {
         try {
             int intForTest = Integer.parseInt(message);
             return true;

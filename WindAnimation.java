@@ -18,9 +18,7 @@ public class WindAnimation extends Application{
 	
 	final static Image image2 = new Image ("dot.png");
 	final static Image image3 = new Image ("title3.png");
-	
-	
-	
+
 	
 	@Override
 	public void start(Stage primaryStage) throws Exception {

@@ -1,3 +1,3 @@
 # Gorilla
 
-Læs mig nu ffs
+Velkommen til det mest guddommenlige spil der findes på denne pragtfulde jordklode. Spids blyanten og sæt dig tilrette i stolen, fordi du vil blive ført ind i en magiskt univers, du aldrig vil drømme om at komme ud fra igen. 
